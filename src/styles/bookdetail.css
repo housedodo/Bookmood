@@ -177,3 +177,41 @@
   font-size: 0.8rem;
   color: var(--text-soft);
 }
+
+.detail-edit {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.detail-info-line {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.link-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.detail-subjects {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-soft);
+}
+
+.detail-thin {
+  margin: 0;
+  padding: 10px 14px;
+  border: var(--outline);
+  border-radius: 16px;
+  background: var(--peach);
+  font-size: 1.15rem;
+  line-height: 1.25;
+}

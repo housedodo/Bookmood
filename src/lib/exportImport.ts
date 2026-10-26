@@ -87,6 +87,7 @@ function readBackupBook(raw: unknown): Book | null {
     id: typeof raw.id === 'string' ? raw.id : crypto.randomUUID(),
     isbn13: raw.isbn13,
     title: raw.title,
+    subtitle: typeof raw.subtitle === 'string' ? raw.subtitle : undefined,
     authors: stringList(raw.authors),
     pageCount: typeof raw.pageCount === 'number' && raw.pageCount > 0 ? raw.pageCount : undefined,
     description: typeof raw.description === 'string' ? raw.description : undefined,

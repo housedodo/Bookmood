@@ -3,6 +3,7 @@ import { deleteBook, updateBook, type Book, type ReadStatus } from '../data/db';
 import { bookThemeStyle } from '../lib/bookTheme';
 import { refreshBook, type RefreshOutcome } from '../lib/refresh';
 import BookCover from './BookCover';
+import BookEditForm from './BookEditForm';
 import Icon from './Icon';
 import Rating from './Rating';
 import Sheet from './Sheet';
@@ -14,8 +15,14 @@ const STATUSES: { value: ReadStatus; label: string }[] = [
   { value: 'read', label: 'Read' },
 ];
 
+const SOURCE_LABEL: Record<Book['source'], string> = {
+  openlibrary: 'Open Library',
+  googlebooks: 'Google Books',
+  manual: 'added by hand',
+};
+
 const REFRESH_TEXT: Record<RefreshOutcome, string> = {
-  updated: 'Found more ♡',
+  updated: 'Updated ♡',
   unchanged: 'Nothing new this time',
   notFound: "Couldn't find it online",
   offline: "You're offline",
@@ -27,6 +34,8 @@ export default function BookDetail({ book, onClose }: { book: Book; onClose: () 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshResult, setRefreshResult] = useState<RefreshOutcome>();
+  const [editing, setEditing] = useState(false);
+  const [showSubjects, setShowSubjects] = useState(false);
 
   const refresh = async () => {
     setRefreshing(true);
@@ -53,6 +62,8 @@ export default function BookDetail({ book, onClose }: { book: Book; onClose: () 
 
   const isbn = book.isbn13.startsWith('manual:') ? undefined : book.isbn13;
   const meta = [book.pageCount && `${book.pageCount} pages`, isbn && `ISBN ${isbn}`].filter(Boolean).join(' · ');
+  // Mood picks need words to match; tell the reader when the lookup found next to nothing.
+  const thinInfo = book.subjects.length + book.genres.length < 2 && !book.description;
 
   return (
     <Sheet title={book.title} onClose={onClose} className="book-theme book-detail" style={bookThemeStyle(book.themeHue)}>
@@ -62,8 +73,13 @@ export default function BookDetail({ book, onClose }: { book: Book; onClose: () 
           {book.authors.length > 0 && <p className="detail-authors">{book.authors.join(', ')}</p>}
           {meta && <p className="detail-meta">{meta}</p>}
           <Rating value={book.rating} onChange={(rating) => save({ rating })} />
+          {!editing && (
+            <button type="button" className="btn btn-small btn-secondary detail-edit" onClick={() => setEditing(true)}>Edit</button>
+          )}
         </div>
       </div>
+
+      {editing && <BookEditForm book={book} onDone={() => setEditing(false)} />}
 
       <div className="segmented" role="group" aria-label="Reading status">
         {STATUSES.map(({ value, label }) => (
@@ -120,6 +136,26 @@ export default function BookDetail({ book, onClose }: { book: Book; onClose: () 
       </section>
 
       <section className="detail-section">
+        <h3>Book info</h3>
+        <p className="detail-info-line">
+          From {SOURCE_LABEL[book.source]} · {book.subjects.length} subject{book.subjects.length === 1 ? '' : 's'} ·{' '}
+          {book.description ? 'description' : 'no description'}
+          {book.subjects.length > 0 && (
+            <>
+              {' · '}
+              <button type="button" className="link-button" onClick={() => setShowSubjects((v) => !v)} aria-expanded={showSubjects}>
+                {showSubjects ? 'hide subjects' : 'show subjects'}
+              </button>
+            </>
+          )}
+        </p>
+        {showSubjects && <p className="detail-subjects">{book.subjects.join(' · ')}</p>}
+        {thinInfo && (
+          <p className="detail-thin hand">
+            Not much info was found online for this book, so mood picks can't see what it's about. Add a few tags yourself
+            (e.g. thriller, twisty, romance) — they count for moods ♡
+          </p>
+        )}
         <div className="detail-refresh">
           <button type="button" className="btn btn-small btn-secondary" onClick={refresh} disabled={refreshing}>
             {refreshing ? 'Looking…' : 'Refresh book info'}

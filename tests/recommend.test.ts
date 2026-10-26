@@ -34,6 +34,11 @@ describe('recommend', () => {
     expect(result.reason).toBe('Matches: romance, rivals, small town, humor');
   });
 
+  it('uses the (hidden) subtitle for matching', () => {
+    const b = book({ title: 'No One Saw a Thing', subtitle: 'The twisty new crime thriller' });
+    expect(recommend([b], ['mysterious'], { jitter: 0 })[0]?.reason).toBe('Matches: crime, thriller');
+  });
+
   it('matches whole words only', () => {
     expect(scoreBook(book({ title: 'An award-winning tale', description: 'glossy pages' }), ['emotional']).score).toBe(0);
   });

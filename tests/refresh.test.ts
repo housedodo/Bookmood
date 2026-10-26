@@ -73,3 +73,27 @@ describe('refreshAll', () => {
     expect(progress).toEqual([1, 2]);
   });
 });
+
+describe('marketing subtitles', () => {
+  const SUBTITLE = 'The Twisty and Unputdownable New Crime Thriller from the Bestselling Author of All Her Fault';
+  const NOSAW = '9781804990780';
+  const olNoOneSaw = {
+    [`ISBN:${NOSAW}`]: { key: '/books/OL1M', title: 'No One Saw a Thing', subtitle: SUBTITLE, authors: [{ name: 'Andrea Mara' }] },
+  };
+  const subtitleFetch: typeof fetch = async (input) =>
+    new Response(JSON.stringify(String(input).includes('api/books') ? olNoOneSaw : {}), { status: 200 });
+
+  it('shortens a title an older version saved as "Title: subtitle", and keeps the subtitle for matching', async () => {
+    const book = await addBook({ isbn13: NOSAW, title: `No One Saw a Thing: ${SUBTITLE}`, authors: ['Andrea Mara'], source: 'openlibrary' }, database);
+    expect(await refreshBook(book, { fetchImpl: subtitleFetch }, database)).toBe('updated');
+    const updated = await database.books.get(book.id);
+    expect(updated?.title).toBe('No One Saw a Thing');
+    expect(updated?.subtitle).toBe(SUBTITLE);
+  });
+
+  it('leaves a title the reader edited alone', async () => {
+    const book = await addBook({ isbn13: NOSAW, title: 'My own title', source: 'openlibrary' }, database);
+    await refreshBook(book, { fetchImpl: subtitleFetch }, database);
+    expect((await database.books.get(book.id))?.title).toBe('My own title');
+  });
+});

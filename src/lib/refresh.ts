@@ -12,7 +12,8 @@ const sameList = (a: string[], b: string[]) => a.length === b.length && a.every(
 /**
  * Fetches a book's info again and fills gaps: adds subjects, genres and automatic tags,
  * and a description, page count, authors or cover only if the book has none.
- * Never overwrites what's there (title, your tags, notes, rating, status).
+ * Never overwrites what's there (your tags, notes, rating, status). The only exception: a title an
+ * older version saved as "Title: marketing subtitle" is shortened to the real title.
  */
 export async function refreshBook(book: Book, options: LookupOptions = {}, database: ShelfDb = db): Promise<RefreshOutcome> {
   const hasIsbn = !book.isbn13.startsWith('manual:');
@@ -21,13 +22,18 @@ export async function refreshBook(book: Book, options: LookupOptions = {}, datab
 
   const subjects = union(book.subjects, result?.subjects ?? []);
   const description = book.description ?? result?.description;
+  const subtitle = book.subtitle ?? result?.subtitle;
+  // Older versions saved "Title: long marketing subtitle" as the title; shorten those.
+  const oldJoinedTitle = result?.subtitle && book.title === `${result.title}: ${result.subtitle}`;
   const changes: Partial<Book> = {
+    title: oldJoinedTitle ? result.title : book.title,
+    subtitle,
     subjects,
     description,
     pageCount: book.pageCount ?? result?.pageCount,
     authors: book.authors.length ? book.authors : result?.authors ?? [],
     genres: union(book.genres, normalizeGenres(subjects)),
-    tags: union(book.tags, deriveTags(subjects, description, book.hiddenTags)),
+    tags: union(book.tags, deriveTags([...subjects, subtitle ?? ''], description, book.hiddenTags)),
   };
 
   if (!book.coverBlob && result?.coverUrls.length) {
@@ -36,6 +42,8 @@ export async function refreshBook(book: Book, options: LookupOptions = {}, datab
   }
 
   const changed =
+    book.title !== changes.title ||
+    book.subtitle !== changes.subtitle ||
     !sameList(book.subjects, subjects) ||
     !sameList(book.genres, changes.genres ?? []) ||
     !sameList(book.tags, changes.tags ?? []) ||

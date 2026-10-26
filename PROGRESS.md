@@ -165,6 +165,12 @@ To switch direction later, the knobs are the CSS variables in `src/styles/theme.
 - Tests: `tests/refresh.test.ts`, `tests/text.test.ts`, work-record cases in `tests/lookup.test.ts`. Fixtures `openlibrary-edition-OL32334186M.json`, `openlibrary-work-OL24337047W.json` are hand-written in the real API shape.
 - **Browser check done**: a book with only "Literary agents" as subject didn't match Romance; after **Refresh all books** it showed "Matches: romance, love stories, enemies to lovers, rivals, rivals to lovers, second chance". A German hand-added book matched Romance via "liebesgeschichte".
 
+### Fixes from real use (No One Saw a Thing, 9781804990780)
+- **Subtitles are no longer glued onto the title.** Lookups often return marketing subtitles ("The Twisty and Unputdownable New Crime Thriller from…"). `Book.subtitle` (new optional field) stores it separately; it's **not shown**, but counts for mood matching and auto tags (strong, 2 points). **Refresh** shortens titles that older versions saved as "Title: subtitle" (only if the title still exactly matches that old form, so edited titles are left alone).
+- **Edit** button in the book sheet (title, authors, pages) for when the online data is wrong.
+- **"Book info" panel** in the book sheet: source, number of subjects, description yes/no, "show subjects". When almost nothing was found (fewer than 2 subjects+genres and no description), a hint suggests adding a few tags yourself.
+- Why "no tags": automatic tags only appear when the subjects/description mention a trope. For new UK/German releases Open Library often has only title + author, and Google Books (no API key) may be rate-limited — then there's nothing to derive tags from.
+
 ## Known risks / to verify on a real phone
 
 - **Cover CORS:** covers are fetched with `fetch()` so the Blob can be stored. If a cover host doesn't send CORS headers, the download fails and the book falls back to the title hue and no stored cover. Check in Phase 5 with real scans.

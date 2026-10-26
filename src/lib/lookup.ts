@@ -3,6 +3,8 @@ import type { BookSource } from '../data/db';
 export interface LookupResult {
   isbn13: string;
   title: string;
+  /** Often marketing text ("The twisty new crime thriller…"): not shown, but used for mood matching. */
+  subtitle?: string;
   authors: string[];
   pageCount?: number;
   description?: string;
@@ -62,7 +64,6 @@ const strings = (value: unknown): string[] =>
 const names = (value: unknown): string[] =>
   Array.isArray(value) ? value.map((item) => (isObject(item) ? str(item.name) : undefined)).filter((s): s is string => s !== undefined) : [];
 
-const withSubtitle = (title: string, subtitle?: string) => (subtitle ? `${title}: ${subtitle}` : title);
 
 // --- Open Library ---
 
@@ -78,7 +79,8 @@ export function parseOpenLibrary(data: unknown, isbn13: string): LookupResult | 
 
   return {
     isbn13,
-    title: withSubtitle(title, str(book.subtitle)),
+    title,
+    subtitle: str(book.subtitle),
     authors: names(book.authors),
     pageCount: positiveInt(book.number_of_pages),
     description: excerpt,
@@ -148,7 +150,8 @@ export function parseGoogleBooks(data: unknown, isbn13: string): LookupResult | 
 
   return {
     isbn13,
-    title: withSubtitle(title, str(info.subtitle)),
+    title,
+    subtitle: str(info.subtitle),
     authors: strings(info.authors),
     pageCount: positiveInt(info.pageCount),
     description: str(info.description),
@@ -164,6 +167,7 @@ export function mergeResults(primary: LookupResult, extra: LookupResult | null):
   if (!extra) return primary;
   return {
     ...primary,
+    subtitle: primary.subtitle ?? extra.subtitle,
     authors: primary.authors.length ? primary.authors : extra.authors,
     pageCount: primary.pageCount ?? extra.pageCount,
     description: primary.description ?? extra.description,
@@ -197,6 +201,8 @@ export async function lookup(isbn13: string, options: LookupOptions = {}): Promi
 export interface TitleSearchResult {
   key: string;
   title: string;
+  /** Often marketing text ("The twisty new crime thriller…"): not shown, but used for mood matching. */
+  subtitle?: string;
   authors: string[];
   /** First valid ISBN-13 of the work, if Open Library knows one. */
   isbn13?: string;

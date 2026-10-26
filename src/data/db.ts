@@ -7,6 +7,7 @@ export interface Book {
   id: string;                 // crypto.randomUUID()
   isbn13: string;             // unique index
   title: string;
+  subtitle?: string;          // not shown (often marketing text); used for mood matching
   authors: string[];
   pageCount?: number;
   description?: string;

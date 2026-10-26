@@ -127,6 +127,14 @@ describe('lookup with the Open Library work record', () => {
   });
 });
 
+describe('subtitles', () => {
+  it('keeps the subtitle out of the title', async () => {
+    const withSubtitle = { [`ISBN:${ISBN}`]: { ...olBook[`ISBN:${ISBN}`], subtitle: 'A Novel' } };
+    const result = await lookup(ISBN, { fetchImpl: fakeFetch(withSubtitle, gbEmpty) });
+    expect(result).toMatchObject({ title: 'Book Lovers', subtitle: 'A Novel' });
+  });
+});
+
 describe('searchByTitle', () => {
   it('parses Open Library search results', async () => {
     const fetchImpl: typeof fetch = async () => new Response(JSON.stringify(searchFixture), { status: 200 });

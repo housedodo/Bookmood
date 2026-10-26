@@ -34,11 +34,11 @@ export function seededRandom(seed: number): () => number {
 
 
 /**
- * Scores one book: keywords in title/subjects/genres/tags count 2, in the description only count 1.
+ * Scores one book: keywords in title/subtitle/subjects/genres/tags count 2, in the description only count 1.
  * Keywords match whole words only ("war" doesn't match "award"); see matchKeyword.
  */
 export function scoreBook(book: Book, moodIds: string[]): { score: number; matched: string[] } {
-  const strongText = [book.title, ...book.subjects, ...book.genres, ...book.tags].join(' \n ').toLowerCase();
+  const strongText = [book.title, book.subtitle ?? '', ...book.subjects, ...book.genres, ...book.tags].join(' \n ').toLowerCase();
   const descriptionText = (book.description ?? '').toLowerCase();
   let score = 0;
   const matched: string[] = [];
