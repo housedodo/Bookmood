@@ -16,6 +16,7 @@ import type { TitleSearchResult } from '../lib/lookup';
 import '../styles/scan.css';
 
 const UNDO_MS = 5000;
+const STICKER_HINT_MS = 6000;
 
 interface ManualPrefill {
   offline?: boolean;
@@ -36,9 +37,16 @@ export default function ScanPage() {
   const [toast, setToast] = useState<ToastData>();
   const [flashKey, setFlashKey] = useState(0);
   const [confettiKey, setConfettiKey] = useState(0);
+  const [stickerHint, setStickerHint] = useState(false);
   const busyRef = useRef(false);
   const gateRef = useRef(createScanGate(3000));
   const clearToast = useCallback(() => setToast(undefined), []);
+
+  useEffect(() => {
+    if (!stickerHint) return;
+    const timer = setTimeout(() => setStickerHint(false), STICKER_HINT_MS);
+    return () => clearTimeout(timer);
+  }, [stickerHint]);
 
   useEffect(() => {
     if (!undoId) return;
@@ -84,10 +92,16 @@ export default function ScanPage() {
 
   const onScan = (isbn: string) => {
     if (busyRef.current || !gateRef.current(isbn)) return;
+    setStickerHint(false);
     navigator.vibrate?.(80);
     setFlashKey((n) => n + 1);
     void lookUp(isbn);
   };
+
+  // The camera sees the code many times per second; the hint just stays up while it does.
+  const onOtherCode = useCallback(() => {
+    if (!busyRef.current) setStickerHint(true);
+  }, []);
 
   const onPickTitle = (result: TitleSearchResult) => {
     setShowTitleSearch(false);
@@ -118,7 +132,14 @@ export default function ScanPage() {
         </label>
       </header>
 
-      <Scanner active={cameraOn && !manual} onIsbn={onScan} flashKey={flashKey} />
+      <Scanner active={cameraOn && !manual} onIsbn={onScan} onOtherCode={onOtherCode} flashKey={flashKey} />
+
+      {stickerHint && !busy && (
+        <p className="scan-sticker-hint" role="status">
+          <span className="hand">That's not a book barcode — maybe a shop sticker?</span> Peel it off if it comes off easily, or type the
+          ISBN / search by title below ♡
+        </p>
+      )}
 
       {busy && <p className="scan-status hand" role="status">Looking it up…</p>}
       {!cameraOn && !busy && (
@@ -147,6 +168,10 @@ export default function ScanPage() {
       )}
 
       <section className="scan-backup">
+        <p className="scan-tip">
+          <strong>Sticker over the barcode?</strong> The ISBN is also printed inside the book, on the copyright page (usually the
+          back of the title page).
+        </p>
         <IsbnLookup onAdded={onAdded} onDuplicate={onDuplicate} onNotFound={(isbn) => setManual({ isbn, offline: !navigator.onLine })} />
         {showTitleSearch ? (
           <TitleSearch onPick={onPickTitle} />

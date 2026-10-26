@@ -149,3 +149,31 @@
   60%  { transform: scale(1.03); opacity: 1; }
   100% { transform: scale(1); }
 }
+
+.scan-sticker-hint {
+  margin: 0;
+  padding: 10px 14px;
+  border: var(--outline);
+  border-radius: 16px;
+  background: var(--peach);
+  box-shadow: var(--pop-s);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  animation: pop-in 0.3s ease-out;
+}
+
+.scan-sticker-hint .hand {
+  display: block;
+  font-size: 1.25rem;
+}
+
+.scan-tip {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--text-soft);
+}
+
+.scan-tip strong {
+  color: var(--text);
+}

@@ -82,6 +82,7 @@ To switch direction later, the knobs are the CSS variables in `src/styles/theme.
 - **"Show another"** excludes everything already shown this round and re-rolls; when nothing is left it says "That's every match for this mood ♡" with **Start over**. Changing moods or length starts a new round.
 - **Mood buttons keep their emojis** (they are the point of the button); everything else stays emoji-light.
 - **Build time in Settings** ("Version built …") shows which deploy the phone has.
+- **Non-ISBN barcodes are no longer ignored silently** (spec §8.2 said silently). Real-world case: a bookshop price sticker (Moser Graz) covered the ISBN barcode and nothing happened. The scanner now also reads EAN-8, UPC-A and Code 128, and when it sees a barcode that isn't an ISBN it shows "That's not a book barcode — maybe a shop sticker?" with what to do. There's also a permanent tip that the ISBN is printed on the copyright page inside the book.
 - **Delete all data** uses two in-page confirm steps instead of browser popups.
 - **CSV**: lists joined with "; ", dates as ISO, UTF-8 with BOM (so Excel shows accents/emojis), manual "ISBNs" left empty.
 - **JSON import** also skips broken entries (no title/ISBN) and counts them as skipped; a non-backup file shows a friendly error.

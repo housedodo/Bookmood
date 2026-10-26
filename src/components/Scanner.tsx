@@ -14,18 +14,22 @@ interface ScannerProps {
   /** Camera runs only while active. */
   active: boolean;
   onIsbn: (isbn13: string) => void;
+  /** A barcode that isn't an ISBN, e.g. a shop sticker. */
+  onOtherCode?: (code: string) => void;
   /** Increment to flash the frame pink (e.g. after a successful scan). */
   flashKey: number;
 }
 
-export default function Scanner({ active, onIsbn, flashKey }: ScannerProps) {
+export default function Scanner({ active, onIsbn, onOtherCode, flashKey }: ScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const onIsbnRef = useRef(onIsbn);
+  const onOtherRef = useRef(onOtherCode);
   const [state, setState] = useState<CameraState>('starting');
 
   useEffect(() => {
     onIsbnRef.current = onIsbn;
-  }, [onIsbn]);
+    onOtherRef.current = onOtherCode;
+  }, [onIsbn, onOtherCode]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -33,7 +37,11 @@ export default function Scanner({ active, onIsbn, flashKey }: ScannerProps) {
     let cancelled = false;
     let stop: (() => void) | undefined;
 
-    startScanner(video, (isbn) => onIsbnRef.current(isbn)).then(
+    startScanner(
+      video,
+      (isbn) => onIsbnRef.current(isbn),
+      (code) => onOtherRef.current?.(code),
+    ).then(
       (handle) => {
         if (cancelled) handle.stop();
         else {

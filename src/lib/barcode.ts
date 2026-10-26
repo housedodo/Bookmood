@@ -13,6 +13,10 @@ const CAMERA: MediaStreamConstraints = {
   video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
 };
 
+// Book barcodes are EAN-13. The others are read only to notice shop stickers and say so.
+const DETECTOR_FORMATS = ['ean_13', 'ean_8', 'upc_a', 'code_128'];
+const ZXING_FORMATS = [BarcodeFormat.EAN_13, BarcodeFormat.EAN_8, BarcodeFormat.UPC_A, BarcodeFormat.CODE_128];
+
 /** Minimal typing for the BarcodeDetector API (Chrome on Android, not iOS Safari). */
 interface DetectorLike {
   detect: (source: HTMLVideoElement) => Promise<{ rawValue: string }[]>;
@@ -26,8 +30,9 @@ async function nativeDetector(): Promise<DetectorLike | null> {
   const Detector = (window as unknown as { BarcodeDetector?: DetectorClass }).BarcodeDetector;
   if (!Detector) return null;
   try {
-    const formats = await Detector.getSupportedFormats();
-    return formats.includes('ean_13') ? new Detector({ formats: ['ean_13'] }) : null;
+    const supported = await Detector.getSupportedFormats();
+    if (!supported.includes('ean_13')) return null;
+    return new Detector({ formats: DETECTOR_FORMATS.filter((f) => supported.includes(f)) });
   } catch {
     return null;
   }
@@ -62,7 +67,7 @@ async function startNative(video: HTMLVideoElement, detector: DetectorLike, onCo
 
 /** Fallback that works everywhere, including iPhone Safari. */
 async function startZxing(video: HTMLVideoElement, onCode: (code: string) => void): Promise<ScannerHandle> {
-  const hints = new Map<DecodeHintType, unknown>([[DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.EAN_13]]]);
+  const hints = new Map<DecodeHintType, unknown>([[DecodeHintType.POSSIBLE_FORMATS, ZXING_FORMATS]]);
   const reader = new BrowserMultiFormatReader(hints, { delayBetweenScanAttempts: 120, delayBetweenScanSuccess: 300 });
   const controls = await reader.decodeFromConstraints(CAMERA, video, (result) => {
     if (result) onCode(result.getText());
@@ -77,10 +82,14 @@ export function cameraErrorKind(error: unknown): CameraError {
 }
 
 /**
- * Opens the back camera and calls onIsbn for every valid ISBN-13 it sees
- * (other barcodes are ignored silently). Rejects with a CameraError.
+ * Opens the back camera and calls onIsbn for every valid ISBN-13 it sees.
+ * Any other barcode (e.g. a shop price sticker) goes to onOther. Rejects with a CameraError.
  */
-export async function startScanner(video: HTMLVideoElement, onIsbn: (isbn13: string) => void): Promise<ScannerHandle> {
+export async function startScanner(
+  video: HTMLVideoElement,
+  onIsbn: (isbn13: string) => void,
+  onOther: (code: string) => void = () => {},
+): Promise<ScannerHandle> {
   if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) throw 'insecure' satisfies CameraError;
   // iOS needs these before the stream starts, or the video opens fullscreen / stays black.
   video.setAttribute('playsinline', 'true');
@@ -89,6 +98,7 @@ export async function startScanner(video: HTMLVideoElement, onIsbn: (isbn13: str
   const onCode = (code: string) => {
     const isbn = normalizeIsbn(code);
     if (isValidIsbn13(isbn)) onIsbn(isbn);
+    else onOther(code);
   };
   try {
     const detector = await nativeDetector();
