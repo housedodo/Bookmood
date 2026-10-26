@@ -20,7 +20,7 @@
 
 .filter-selects {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
 }
 
@@ -32,4 +32,17 @@
 
 .chip-needs-info {
   background: var(--peach);
+}
+
+.chip-count {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.chip[aria-pressed='true'] .chip-count {
+  background: var(--surface);
 }

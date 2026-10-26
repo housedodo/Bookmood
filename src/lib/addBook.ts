@@ -28,7 +28,7 @@ export async function addByIsbn(isbn13: string): Promise<AddByIsbnResult> {
       pageCount: result.pageCount,
       description: result.description,
       subjects: result.subjects,
-      genres: normalizeGenres(result.subjects),
+      genres: normalizeGenres([...result.subjects, result.subtitle ?? '']),
       tags: deriveTags([...result.subjects, result.subtitle ?? ''], result.description),
       coverBlob,
       themeHue,

@@ -41,6 +41,21 @@ describe('LibraryPage', () => {
     expect(screen.getByRole('button', { name: /Ice & Ember/ })).toBeInTheDocument();
   });
 
+  it('shows one genre at a time with the genre chips', async () => {
+    await addBook({ isbn13: '1', title: 'Hockey Hearts', genres: ['Romance'], source: 'manual' });
+    await addBook({ isbn13: '2', title: 'Cold Case', genres: ['Thriller'], source: 'manual' });
+    renderPage();
+    const genreRow = await screen.findByRole('group', { name: 'Genre' });
+
+    await userEvent.click(within(genreRow).getByRole('button', { name: /Thriller/ }));
+    expect(screen.queryByRole('button', { name: /Hockey Hearts/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Cold Case/ })).toBeInTheDocument();
+
+    // Tapping it again shows everything.
+    await userEvent.click(within(genreRow).getByRole('button', { name: /Thriller/ }));
+    expect(screen.getByRole('button', { name: /Hockey Hearts/ })).toBeInTheDocument();
+  });
+
   it('adds a book by hand', async () => {
     renderPage();
     await userEvent.click(await screen.findByRole('button', { name: 'Add by hand' }));

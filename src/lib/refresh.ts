@@ -32,7 +32,7 @@ export async function refreshBook(book: Book, options: LookupOptions = {}, datab
     description,
     pageCount: book.pageCount ?? result?.pageCount,
     authors: book.authors.length ? book.authors : result?.authors ?? [],
-    genres: union(book.genres, normalizeGenres(subjects)),
+    genres: union(book.genres, normalizeGenres([...subjects, subtitle ?? ''])),
     tags: union(book.tags, deriveTags([...subjects, subtitle ?? ''], [description ?? '', book.blurb ?? ''].join(' \n '), book.hiddenTags)),
     infoSources: union(book.infoSources ?? [], result?.infoSources ?? []) as Book['infoSources'],
   };

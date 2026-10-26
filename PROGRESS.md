@@ -192,6 +192,10 @@ Most books are scanned *before* reading, so the reader can't tag the mood. The a
 - **D. Quieter mood chips on the scan card**: folded behind "Know the mood already?". If the mood is unknown, the card instead offers "Not much info found, so I can't tell its mood yet. Snap the back cover?" with the photo button.
 - Tests: `tests/ocr.test.ts` (text clean-up, moodUnknown, auto tags from blurb), blurb-language + blurb + once-per-mood cases in `tests/recommend.test.ts`, unknown-mood row in `tests/PickPage.test.tsx`, filter in `tests/library.test.ts`.
 
+### Genre chips in the Library
+- The genre dropdown is replaced by a sideways-scrolling row of genre chips with counts ("Romance 3"), most common first. One genre at a time; tapping the selected chip again (or "All genres") shows everything. Sort keeps its dropdown, now full width. `libraryGenres()` returns `{ genre, count }[]`.
+- Genres are now also taken from the **subtitle** (on add and on refresh), so "…New Crime Thriller…" gives Thriller + Crime.
+
 ## Known risks / to verify on a real phone
 
 - **Cover CORS:** covers are fetched with `fetch()` so the Blob can be stored. If a cover host doesn't send CORS headers, the download fails and the book falls back to the title hue and no stored cover. Check in Phase 5 with real scans.

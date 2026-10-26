@@ -71,7 +71,16 @@ export function sortBooks(books: Book[], key: SortKey): Book[] {
   }
 }
 
-/** All genres used in the library, alphabetically, for the genre dropdown. */
-export function libraryGenres(books: Book[]): string[] {
-  return [...new Set(books.flatMap((book) => book.genres))].sort(byText);
+export interface GenreCount {
+  genre: string;
+  count: number;
+}
+
+/** Genres used in the library with how many books have each; most common first, then A–Z. */
+export function libraryGenres(books: Book[]): GenreCount[] {
+  const counts = new Map<string, number>();
+  for (const genre of books.flatMap((book) => book.genres)) counts.set(genre, (counts.get(genre) ?? 0) + 1);
+  return [...counts]
+    .map(([genre, count]) => ({ genre, count }))
+    .sort((a, b) => b.count - a.count || byText(a.genre, b.genre));
 }

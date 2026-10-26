@@ -46,6 +46,10 @@ describe('library filters', () => {
   });
 
   it('lists genres in the library', () => {
-    expect(libraryGenres(books)).toEqual(['Fantasy', 'Humor', 'Romance']);
+    expect(libraryGenres(books)).toEqual([
+      { genre: 'Romance', count: 2 },
+      { genre: 'Fantasy', count: 1 },
+      { genre: 'Humor', count: 1 },
+    ]);
   });
 });

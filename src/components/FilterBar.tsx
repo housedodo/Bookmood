@@ -1,5 +1,5 @@
 import type { ReadStatus } from '../data/db';
-import { SORT_OPTIONS, type LengthFilter, type LibraryFilters, type SortKey } from '../lib/library';
+import { SORT_OPTIONS, type GenreCount, type LengthFilter, type LibraryFilters, type SortKey } from '../lib/library';
 import '../styles/filterbar.css';
 
 const STATUSES: { value: ReadStatus | 'all'; label: string }[] = [
@@ -21,7 +21,7 @@ interface FilterBarProps {
   onChange: (filters: LibraryFilters) => void;
   sort: SortKey;
   onSortChange: (sort: SortKey) => void;
-  genres: string[];
+  genres: GenreCount[];
   /** How many books the app can't tell the mood of; the filter chip only shows when there are some. */
   moodUnknownCount: number;
 }
@@ -57,14 +57,26 @@ export default function FilterBar({ filters, onChange, sort, onSortChange, genre
           </button>
         </div>
       )}
-      <div className="filter-selects">
-        <label className="visually-hidden" htmlFor="genre-filter">Genre</label>
-        <select id="genre-filter" className="select" value={filters.genre} onChange={(e) => set({ genre: e.target.value })}>
-          <option value="">All genres</option>
-          {genres.map((genre) => (
-            <option key={genre} value={genre}>{genre}</option>
+      {genres.length > 0 && (
+        // One genre at a time; tapping the selected one again shows all genres.
+        <div className="chip-row" role="group" aria-label="Genre">
+          <button type="button" className="chip" aria-pressed={!filters.genre} onClick={() => set({ genre: '' })}>
+            All genres
+          </button>
+          {genres.map(({ genre, count }) => (
+            <button
+              key={genre}
+              type="button"
+              className="chip"
+              aria-pressed={filters.genre === genre}
+              onClick={() => set({ genre: filters.genre === genre ? '' : genre })}
+            >
+              {genre} <span className="chip-count">{count}</span>
+            </button>
           ))}
-        </select>
+        </div>
+      )}
+      <div className="filter-selects">
         <label className="visually-hidden" htmlFor="sort">Sort by</label>
         <select id="sort" className="select" value={sort} onChange={(e) => onSortChange(e.target.value as SortKey)}>
           {SORT_OPTIONS.map(({ key, label }) => (

@@ -90,6 +90,7 @@ describe('marketing subtitles', () => {
     const updated = await database.books.get(book.id);
     expect(updated?.title).toBe('No One Saw a Thing');
     expect(updated?.subtitle).toBe(SUBTITLE);
+    expect(updated?.genres).toEqual(['Thriller', 'Crime']); // from the subtitle
   });
 
   it('leaves a title the reader edited alone', async () => {
