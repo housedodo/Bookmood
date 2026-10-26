@@ -1,0 +1,103 @@
+.pick {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.pick .page-subtitle {
+  margin-bottom: 0;
+}
+
+.pick-length {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pick-length-label {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.pick-results {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pick-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pick-buttons .btn {
+  flex: 1 1 140px;
+}
+
+.pick-result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border: var(--outline);
+  border-radius: var(--radius-m);
+  background: var(--book-bg);
+  box-shadow: 4px 4px 0 var(--text);
+  animation: fade-in 0.3s ease-out both;
+}
+
+.pick-result-main {
+  display: flex;
+  gap: 14px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.pick-result-cover {
+  flex-shrink: 0;
+  width: 76px;
+  aspect-ratio: 2 / 3;
+  font-size: 0.65rem;
+  padding: 6px;
+}
+
+.pick-result-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pick-result-text strong {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.pick-result-text span {
+  font-size: 0.85rem;
+}
+
+.pick-result-pages {
+  color: var(--text-soft);
+}
+
+.pick-result .pick-result-reason {
+  margin-top: 4px;
+  font-size: 1.2rem;
+  line-height: 1.1;
+}
+
+.pick-result-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}

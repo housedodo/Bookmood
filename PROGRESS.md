@@ -13,8 +13,8 @@ Update this file at the end of every phase.
 | 3 | Lookup (Open Library → Google Books) + cover download & theme hue + tests | ✅ done |
 | 4 | Library UI: manual add, BookCard, grid, search, filters, sort, BookDetail | ✅ done |
 | 5 | Scanner: camera, debounce, duplicates, undo, batch mode, confetti | ✅ done |
-| 6 | Pick page: MoodPicker, `recommend.ts` + tests, results | ⏳ next |
-| 7 | Settings (export/import), PWA, icons, polish, README | — |
+| 6 | Pick page: MoodPicker, `recommend.ts` + tests, results | ✅ done |
+| 7 | Settings (export/import), PWA, icons, polish, README | ⏳ next |
 
 ## Running it
 
@@ -75,6 +75,13 @@ To switch direction later, the knobs are the CSS variables in `src/styles/theme.
 - **"Search by title"** uses Open Library search (`search.json?title=`) and takes the first ISBN-13 Open Library lists for that work — this may be a different edition than your copy. Results without any ISBN-13 open the manual form pre-filled with title + author.
 - **Opening a book from the Scan page** navigates to `/#/?book=<id>`: the open book lives in the URL (so the phone's Back button closes the sheet too).
 - **Toast texts use ♡ instead of 💗** (fewer emojis).
+- **Mood keywords match whole words only** ("war" doesn't match "award", "loss" doesn't match "glossy"). Title and tags count as strong (2 points) like subjects/genres; description-only matches count 1. A keyword found in both counts once, as 2.
+- **Jitter** is ±0.5 by default (`jitter` option, 0 turns it off for tests). It can reorder books whose scores are within 1 point, never more.
+- **Books without a page count are kept** when a max length is chosen (their length is unknown, so they aren't "over").
+- **"Not now"** hides a book until the app is reopened (in-memory set in `src/lib/session.ts`).
+- **"Show another"** excludes everything already shown this round and re-rolls; when nothing is left it says "That's every match for this mood ♡" with **Start over**. Changing moods or length starts a new round.
+- **Mood buttons keep their emojis** (they are the point of the button); everything else stays emoji-light.
+- **Build time in Settings** ("Version built …") shows which deploy the phone has.
 - Library versions are current releases: React 19, Vite 8, Vitest 5, TypeScript 6, Dexie 4.
 
 ## What exists, file by file
@@ -124,6 +131,13 @@ To switch direction later, the knobs are the CSS variables in `src/styles/theme.
 - `searchByTitle()` + `parseTitleSearch()` in `src/lib/lookup.ts`.
 - Tests: `tests/barcode.test.ts` (3-second gate, camera error mapping), title search in `tests/lookup.test.ts` (fixture `openlibrary-search-book-lovers.json`).
 - **End-to-end check done in headless Chromium** with a fake camera showing a generated EAN-13 barcode (9780593334836) and mocked API answers: ZXing read the code, the book was saved with Undo, a second scan showed the duplicate toast, and Open jumped to the book in the Library.
+
+### Phase 6 — Pick page
+- `src/lib/recommend.ts` (pure): `recommend(books, moodIds, { maxPages?, excludeIds?, seed?, jitter? })` → up to 5 `{ book, score, matched, reason }` with `reason = "Matches: romance, rivals"`; `scoreBook`, `surprise`, `seededRandom` (mulberry32).
+- `src/components/MoodPicker.tsx`: ~100×100 rounded buttons cycling pink/lavender/peach/mint, multi-select, selected = thick pink border + bounce.
+- `src/components/PickResult.tsx`: themed result card (cover, title, author, pages, reason in Caveat) with **Start reading** (→ status `reading`, confetti, toast with Open) and **Not now**. Tapping the card opens the book in the Library.
+- `src/pages/PickPage.tsx`: title "What are you in the mood for?", MoodPicker, Max length chips (Any / Short < 250 / Medium ≤ 450), results, **Show another**, **Surprise me** (random unread book), "Just surprise me" before any mood is picked, spec's friendly no-match message, empty-shelf and all-read states.
+- Tests: `tests/recommend.test.ts` (every spec checklist item + whole-word matching + jitter bound), `tests/MoodPicker.test.tsx`, `tests/PickPage.test.tsx`.
 
 ## Known risks / to verify on a real phone
 
