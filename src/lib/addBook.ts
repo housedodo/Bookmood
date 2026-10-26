@@ -33,6 +33,7 @@ export async function addByIsbn(isbn13: string): Promise<AddByIsbnResult> {
       coverBlob,
       themeHue,
       source: result.source,
+      infoSources: result.infoSources,
     });
     return { kind: 'added', book };
   } catch {

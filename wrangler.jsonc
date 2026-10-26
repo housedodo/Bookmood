@@ -1,11 +1,15 @@
-// Cloudflare Workers static-assets config: serves the Vite build output.
+// Cloudflare Worker: serves the Vite build (dist/) and forwards a few DNB requests (worker/index.ts).
 {
   "name": "bookmood",
+  "main": "worker/index.ts",
   "compatibility_date": "2025-10-01",
   "workers_dev": true,
   "preview_urls": true,
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "single-page-application"
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    // Only /api/* runs the Worker code; everything else is served straight from dist/.
+    "run_worker_first": ["/api/*"]
   }
 }

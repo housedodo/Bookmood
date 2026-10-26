@@ -264,3 +264,8 @@ button {
   font-size: 0.8rem;
   color: var(--text-soft);
 }
+
+/* Mood chips show their emoji instead of the ♡ marker when selected. */
+.mood-chips .chip[aria-pressed='true']::before {
+  content: none;
+}

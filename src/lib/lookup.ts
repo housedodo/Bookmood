@@ -1,4 +1,9 @@
-import type { BookSource } from '../data/db';
+import type { BookSource, InfoSource } from '../data/db';
+import { isGermanIsbn, lookupDnb } from './dnb';
+import { fetchJson, type LookupOptions } from './http';
+import { lookupWikipedia } from './wikipedia';
+
+export { fetchJson, type LookupOptions };
 
 export interface LookupResult {
   isbn13: string;
@@ -12,14 +17,9 @@ export interface LookupResult {
   /** Candidate cover URLs, best first. */
   coverUrls: string[];
   source: Exclude<BookSource, 'manual'>;
+  /** Every source that contributed something, for the "Book info" panel. */
+  infoSources?: InfoSource[];
 }
-
-export interface LookupOptions {
-  fetchImpl?: typeof fetch;
-  timeoutMs?: number;
-}
-
-const DEFAULT_TIMEOUT_MS = 8000;
 
 export const openLibraryUrl = (isbn: string) =>
   `https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`;
@@ -28,22 +28,6 @@ export const googleBooksUrl = (isbn: string) =>
 // default=false makes Open Library answer 404 instead of a blank image when there is no cover.
 export const openLibraryCoverUrl = (isbn: string) =>
   `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg?default=false`;
-
-/** GET + JSON parse with a timeout. Returns null on any failure (network, timeout, bad status, bad JSON). */
-export async function fetchJson(url: string, options: LookupOptions = {}): Promise<unknown> {
-  const { fetchImpl = fetch, timeoutMs = DEFAULT_TIMEOUT_MS } = options;
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetchImpl(url, { signal: controller.signal });
-    if (!response.ok) return null;
-    return await response.json();
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timer);
-  }
-}
 
 // --- tiny helpers for reading untyped JSON safely ---
 
@@ -63,7 +47,6 @@ const strings = (value: unknown): string[] =>
 
 const names = (value: unknown): string[] =>
   Array.isArray(value) ? value.map((item) => (isObject(item) ? str(item.name) : undefined)).filter((s): s is string => s !== undefined) : [];
-
 
 // --- Open Library ---
 
@@ -176,24 +159,56 @@ export function mergeResults(primary: LookupResult, extra: LookupResult | null):
   };
 }
 
+/** True when mood matching would have little to work with. */
+const needsMoreInfo = (result: LookupResult | null) => !result || !result.description || result.subjects.length < 3;
+
 /**
- * Looks up a book: Open Library first, then Google Books. Never throws; null means "not found".
- * When Open Library finds the book, its work record adds subjects and a description; if there is
- * still no description, Google Books is asked for one, because mood matching relies on it.
+ * Looks up a book. Never throws; null means "not found". Order:
+ * 1. Open Library (edition, then its work record for more subjects and a description)
+ * 2. Google Books, if there's still no description
+ * 3. Deutsche Nationalbibliothek, for German-language books or when info is still thin
+ * 4. Wikipedia, if there's still no description (only well-known books have a page)
  */
 export async function lookup(isbn13: string, options: LookupOptions = {}): Promise<LookupResult | null> {
-  const openLibraryData = await fetchJson(openLibraryUrl(isbn13), options);
-  let fromOpenLibrary = parseOpenLibrary(openLibraryData, isbn13);
-  const editionKey = openLibraryEditionKey(openLibraryData, isbn13);
-  if (fromOpenLibrary && editionKey) {
-    fromOpenLibrary = mergeWork(fromOpenLibrary, await fetchOpenLibraryWork(editionKey, options));
-  }
-  const fromGoogle = fromOpenLibrary?.description
-    ? null
-    : parseGoogleBooks(await fetchJson(googleBooksUrl(isbn13), options), isbn13);
+  const sources: InfoSource[] = [];
 
-  if (fromOpenLibrary) return mergeResults(fromOpenLibrary, fromGoogle);
-  return fromGoogle;
+  const openLibraryData = await fetchJson(openLibraryUrl(isbn13), options);
+  let result = parseOpenLibrary(openLibraryData, isbn13);
+  const editionKey = openLibraryEditionKey(openLibraryData, isbn13);
+  if (result) {
+    sources.push('openlibrary');
+    if (editionKey) result = mergeWork(result, await fetchOpenLibraryWork(editionKey, options));
+  }
+
+  if (!result?.description) {
+    const fromGoogle = parseGoogleBooks(await fetchJson(googleBooksUrl(isbn13), options), isbn13);
+    if (fromGoogle) {
+      sources.push('googlebooks');
+      result = result ? mergeResults(result, fromGoogle) : fromGoogle;
+    }
+  }
+
+  if (isGermanIsbn(isbn13) || needsMoreInfo(result)) {
+    const fromDnb = await lookupDnb(isbn13, options);
+    if (fromDnb) {
+      sources.push('dnb');
+      result = result ? mergeResults(result, fromDnb) : fromDnb;
+    }
+  }
+
+  if (result && !result.description) {
+    const wiki = await lookupWikipedia(result.title, result.authors, isGermanIsbn(isbn13), options);
+    if (wiki) {
+      sources.push('wikipedia');
+      result = {
+        ...result,
+        description: wiki.description,
+        subjects: wiki.shortDescription ? [...new Set([...result.subjects, wiki.shortDescription])] : result.subjects,
+      };
+    }
+  }
+
+  return result ? { ...result, infoSources: sources } : null;
 }
 
 // --- Search by title (Open Library search) ---
@@ -201,8 +216,6 @@ export async function lookup(isbn13: string, options: LookupOptions = {}): Promi
 export interface TitleSearchResult {
   key: string;
   title: string;
-  /** Often marketing text ("The twisty new crime thriller…"): not shown, but used for mood matching. */
-  subtitle?: string;
   authors: string[];
   /** First valid ISBN-13 of the work, if Open Library knows one. */
   isbn13?: string;

@@ -26,6 +26,7 @@ describe('deriveTags', () => {
   it('finds tropes in subjects and descriptions, in English and German', () => {
     expect(deriveTags(['Enemies to lovers', 'Hockey'], 'A small-town story.')).toEqual(['enemies to lovers', 'small town', 'sports']);
     expect(deriveTags([], 'Eine Liebesgeschichte in einer Kleinstadt, kurz vor Weihnachten.')).toEqual(['small town', 'christmas']);
+    expect(deriveTags([], 'Über zweite Chancen und den Mut, neu anzufangen.')).toEqual(['second chance']);
   });
 
   it('leaves out tags the reader removed', () => {

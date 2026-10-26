@@ -6,7 +6,7 @@ A cute, pastel, phone-first app for your own bookshelf. Scan a book's barcode to
 - Private: your library lives only on your device (IndexedDB). Export a backup in Settings now and then.
 - Installable: add it to your home screen, and the library works offline.
 
-Book data comes from [Open Library](https://openlibrary.org) and [Google Books](https://books.google.com).
+Book data comes from [Open Library](https://openlibrary.org), [Google Books](https://books.google.com), the [Deutsche Nationalbibliothek](https://www.dnb.de) and [Wikipedia](https://www.wikipedia.org).
 
 ## Run it locally
 
@@ -51,7 +51,7 @@ Open the `https://….trycloudflare.com` link it prints on your phone and allow 
 
 ## Deploy for free on Cloudflare
 
-This repo is set up for **Cloudflare Workers** with static assets (`wrangler.jsonc` serves the `dist/` folder).
+This repo is set up for **Cloudflare Workers** with static assets (`wrangler.jsonc` serves the `dist/` folder). A tiny Worker script (`worker/index.ts`) also forwards book lookups to the German national library, which browsers can't call directly.
 
 1. Make a free account at [dash.cloudflare.com](https://dash.cloudflare.com).
 2. **Workers & Pages → Create → Import a repository**, then connect GitHub and choose this repo. If the repo isn't listed, allow the "Cloudflare Workers and Pages" GitHub app to access it (GitHub → Settings → Applications).
@@ -68,7 +68,7 @@ From then on, every push to `main` redeploys automatically. Other branches get t
 
 ### Cloudflare Pages instead
 
-It also works as a plain static site: connect the repo under **Pages**, choose build command `npm run build` and output directory `dist`, and leave the deploy command empty. Netlify and GitHub Pages work the same way. Routing uses `#/…` URLs, so no server rewrites are needed.
+It also works as a plain static site: connect the repo under **Pages**, choose build command `npm run build` and output directory `dist`, and leave the deploy command empty. Netlify and GitHub Pages work the same way. Routing uses `#/…` URLs, so no server rewrites are needed. On a plain static host the German national library lookup is skipped (it needs the Worker); everything else works.
 
 ## How it's built
 

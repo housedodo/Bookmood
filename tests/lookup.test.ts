@@ -2,6 +2,9 @@ import { lookup, searchByTitle, type LookupOptions } from '../src/lib/lookup';
 import searchFixture from './fixtures/openlibrary-search-book-lovers.json';
 import olEdition from './fixtures/openlibrary-edition-OL32334186M.json';
 import olWork from './fixtures/openlibrary-work-OL24337047W.json';
+import dnbXml from './fixtures/dnb-9783426000007.xml?raw';
+import dnbBlurb from './fixtures/dnb-text-1300000001.html?raw';
+import wikiBookLovers from './fixtures/wikipedia-book-lovers.json';
 import olBook from './fixtures/openlibrary-9780593334836.json';
 import olEmpty from './fixtures/openlibrary-empty.json';
 import gbBook from './fixtures/googlebooks-9780593334836.json';
@@ -158,5 +161,49 @@ describe('searchByTitle', () => {
     };
     expect(await searchByTitle('  ', { fetchImpl: failing })).toEqual([]);
     expect(await searchByTitle('x', { fetchImpl: failing })).toEqual([]);
+  });
+});
+
+describe('lookup with DNB and Wikipedia', () => {
+  const answer = (map: [string, string][]) =>
+    (async (input: RequestInfo | URL) => {
+      const url = String(input);
+      const hit = map.find(([part]) => url.includes(part));
+      return hit ? new Response(hit[1]) : new Response('{}');
+    }) as typeof fetch;
+
+  it('finds a German book only the DNB knows, with the publisher blurb', async () => {
+    const result = await lookup('9783426000007', {
+      fetchImpl: answer([
+        ['/api/dnb?', dnbXml],
+        ['/api/dnb-text?', dnbBlurb],
+      ]),
+    });
+    expect(result).toMatchObject({ title: 'Ein Sommer am See', authors: ['Anna Berg'], source: 'dnb', infoSources: ['dnb'] });
+    expect(result?.description).toMatch(/Liebesgeschichte/);
+  });
+
+  it('adds a Wikipedia summary when nothing else has a description', async () => {
+    const result = await lookup(ISBN, {
+      fetchImpl: answer([
+        ['api/books', JSON.stringify(olBook)],
+        ['en.wikipedia.org', JSON.stringify(wikiBookLovers)],
+      ]),
+    });
+    expect(result?.infoSources).toEqual(['openlibrary', 'wikipedia']);
+    expect(result?.description).toMatch(/^Book Lovers is a 2022 romance novel/);
+    expect(result?.subjects).toContain('2022 romance novel by Emily Henry');
+  });
+
+  it('skips DNB and Wikipedia when the book already has plenty of info', async () => {
+    const calls: string[] = [];
+    const fetchImpl: typeof fetch = async (input) => {
+      const url = String(input);
+      calls.push(url);
+      const body = url.includes('api/books') ? olBook : url.includes('/books/OL') ? olEdition : url.includes('/works/') ? olWork : {};
+      return new Response(JSON.stringify(body));
+    };
+    await lookup(ISBN, { fetchImpl });
+    expect(calls.some((url) => url.includes('dnb') || url.includes('wikipedia'))).toBe(false);
   });
 });

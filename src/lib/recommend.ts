@@ -15,8 +15,13 @@ export interface ScoredBook {
   book: Book;
   score: number;
   matched: string[];
+  /** Selected moods the reader gave this book themselves. */
+  yourMoods: string[];
   reason: string;
 }
+
+/** A mood the reader picked for the book outweighs a handful of keyword matches. */
+export const YOUR_MOOD_POINTS = 5;
 
 const MAX_RESULTS = 5;
 
@@ -37,7 +42,7 @@ export function seededRandom(seed: number): () => number {
  * Scores one book: keywords in title/subtitle/subjects/genres/tags count 2, in the description only count 1.
  * Keywords match whole words only ("war" doesn't match "award"); see matchKeyword.
  */
-export function scoreBook(book: Book, moodIds: string[]): { score: number; matched: string[] } {
+export function scoreBook(book: Book, moodIds: string[]): { score: number; matched: string[]; yourMoods: string[] } {
   const strongText = [book.title, book.subtitle ?? '', ...book.subjects, ...book.genres, ...book.tags].join(' \n ').toLowerCase();
   const descriptionText = (book.description ?? '').toLowerCase();
   let score = 0;
@@ -52,7 +57,15 @@ export function scoreBook(book: Book, moodIds: string[]): { score: number; match
       if (!matched.includes(word)) matched.push(word);
     }
   }
-  return { score, matched };
+  const yourMoods = (book.moods ?? []).filter((id) => moodIds.includes(id));
+  return { score: score + yourMoods.length * YOUR_MOOD_POINTS, matched, yourMoods };
+}
+
+function reasonFor(matched: string[], yourMoods: string[]): string {
+  const labels = MOODS.filter((m) => yourMoods.includes(m.id)).map((m) => m.label);
+  return [labels.length ? `You said: ${labels.join(', ')}` : '', matched.length ? `Matches: ${matched.join(', ')}` : '']
+    .filter(Boolean)
+    .join(' · ');
 }
 
 /** Top 5 unread books for the selected moods. Books that match nothing are left out. */
@@ -70,7 +83,7 @@ export function recommend(books: Book[], selectedMoodIds: string[], options: Rec
     // Highest score first; on a tie the book that has waited longest wins.
     .sort((a, b) => b.rank - a.rank || a.book.dateAdded - b.book.dateAdded)
     .slice(0, MAX_RESULTS)
-    .map(({ book, score, matched }) => ({ book, score, matched, reason: `Matches: ${matched.join(', ')}` }));
+    .map(({ book, score, matched, yourMoods }) => ({ book, score, matched, yourMoods, reason: reasonFor(matched, yourMoods) }));
 }
 
 /** A random unread book for "Surprise me", or undefined if there are none. */

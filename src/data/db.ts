@@ -1,7 +1,9 @@
 import Dexie, { type EntityTable } from 'dexie';
 
 export type ReadStatus = 'unread' | 'reading' | 'read';
-export type BookSource = 'openlibrary' | 'googlebooks' | 'manual';
+export type BookSource = 'openlibrary' | 'googlebooks' | 'dnb' | 'manual';
+/** Where a book's info came from, for the "Book info" panel. */
+export type InfoSource = 'openlibrary' | 'googlebooks' | 'dnb' | 'wikipedia';
 
 export interface Book {
   id: string;                 // crypto.randomUUID()
@@ -19,6 +21,8 @@ export interface Book {
   rating?: 1 | 2 | 3 | 4 | 5;
   tags: string[];             // user tags + automatic trope tags (see tropes.ts)
   hiddenTags?: string[];      // automatic tags the reader removed; never re-added
+  moods?: string[];           // mood ids the reader picked ("cozy", "dark"…); count most in mood picks
+  infoSources?: InfoSource[]; // where the info came from (Book info panel)
   notes?: string;
   dateAdded: number;          // Date.now()
   source: BookSource;

@@ -86,8 +86,8 @@
 
 .scan-card {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  flex-direction: column;
+  gap: 8px;
   padding: 10px 12px;
   border: var(--outline);
   border-radius: var(--radius-m);
@@ -176,4 +176,26 @@
 
 .scan-tip strong {
   color: var(--text);
+}
+
+.scan-card-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.scan-card-moods-label {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.scan-card-moods-label small {
+  font-weight: 500;
+  color: var(--text-soft);
+}
+
+.scan-card .mood-chips {
+  margin: 0 -12px;
+  padding: 2px 12px 6px;
 }

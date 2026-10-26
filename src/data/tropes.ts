@@ -7,7 +7,7 @@ export const TROPES: { tag: string; patterns: string[] }[] = [
   { tag: 'rivals to lovers', patterns: ['rivals to lovers', 'rivals-to-lovers', 'rivalen zu liebenden'] },
   { tag: 'friends to lovers', patterns: ['friends to lovers', 'friends-to-lovers', 'freunde zu liebenden'] },
   { tag: 'fake dating', patterns: ['fake dating', 'fake-dating', 'fake relationship', 'fake boyfriend', 'fake girlfriend', 'fake engagement', 'fake fiancé', 'scheinbeziehung*', 'fake-beziehung'] },
-  { tag: 'second chance', patterns: ['second chance*', 'second-chance*', 'zweite chance'] },
+  { tag: 'second chance', patterns: ['second chance*', 'second-chance*', 'zweite chance*'] },
   { tag: 'grumpy sunshine', patterns: ['grumpy sunshine', 'grumpy/sunshine', 'grumpy x sunshine', 'grumpy-sunshine'] },
   { tag: 'forced proximity', patterns: ['forced proximity', 'only one bed', 'snowed in', 'eingeschneit'] },
   { tag: 'slow burn', patterns: ['slow burn', 'slow-burn'] },

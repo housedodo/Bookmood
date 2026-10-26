@@ -1,0 +1,31 @@
+{
+  "batchcomplete": "",
+  "query": {
+    "pages": {
+      "70112233": {
+        "pageid": 70112233,
+        "ns": 0,
+        "title": "Book Lovers (novel)",
+        "index": 2,
+        "pageprops": { "wikibase-shortdesc": "2022 romance novel by Emily Henry" },
+        "extract": "Book Lovers is a 2022 romance novel by American author Emily Henry. It follows Nora Stephens, a literary agent from New York City, who spends a summer in the small town of Sunshine Falls, North Carolina, with her sister and keeps running into her professional rival, the editor Charlie Lastra."
+      },
+      "1001": {
+        "pageid": 1001,
+        "ns": 0,
+        "title": "Book Lovers",
+        "index": 1,
+        "pageprops": { "disambiguation": "" },
+        "extract": "Book Lovers may refer to: Book Lovers (novel), a 2022 novel by Emily Henry; Book lovers, people who love books."
+      },
+      "2002": {
+        "pageid": 2002,
+        "ns": 0,
+        "title": "Emily Henry",
+        "index": 3,
+        "pageprops": {},
+        "extract": "Emily Henry is an American author of romance novels, including Beach Read, People We Meet on Vacation and Book Lovers, all of them bestsellers."
+      }
+    }
+  }
+}

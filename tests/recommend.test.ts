@@ -34,6 +34,27 @@ describe('recommend', () => {
     expect(result.reason).toBe('Matches: romance, rivals, small town, humor');
   });
 
+  it('gives books the reader tagged with a mood a big boost, and says so', () => {
+    const tagged = book({ title: 'Quiet Book', moods: ['cozy'] });
+    const keywords = book({ title: 'Small town bakery', subjects: ['Small town', 'Bakery'] }); // 4 points
+    const results = recommend([keywords, tagged], ['cozy'], { jitter: 0 });
+    expect(ids(results)).toEqual(['Quiet Book', 'Small town bakery']);
+    expect(results[0].reason).toBe('You said: Cozy');
+    expect(results[0].score).toBe(5);
+  });
+
+  it('combines your moods and keyword matches in the reason', () => {
+    const b = book({ title: 'Hockey Hearts', subjects: ['Romance'], moods: ['romance', 'funny'] });
+    const [result] = recommend([b], ['romance', 'cozy'], { jitter: 0 });
+    expect(result.reason).toBe('You said: Romance · Matches: romance');
+    expect(result.yourMoods).toEqual(['romance']);
+  });
+
+  it('a book with only your mood (no data at all) still gets suggested', () => {
+    const bare = book({ title: 'No One Saw a Thing', moods: ['mysterious'] });
+    expect(ids(recommend([bare], ['mysterious'], { jitter: 0 }))).toEqual(['No One Saw a Thing']);
+  });
+
   it('uses the (hidden) subtitle for matching', () => {
     const b = book({ title: 'No One Saw a Thing', subtitle: 'The twisty new crime thriller' });
     expect(recommend([b], ['mysterious'], { jitter: 0 })[0]?.reason).toBe('Matches: crime, thriller');

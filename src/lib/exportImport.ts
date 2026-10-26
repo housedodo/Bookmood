@@ -1,4 +1,6 @@
-import { db, type Book, type ShelfDb } from '../data/db';
+import { db, type Book, type InfoSource, type ShelfDb } from '../data/db';
+
+const INFO_SOURCES: InfoSource[] = ['openlibrary', 'googlebooks', 'dnb', 'wikipedia'];
 
 const BACKUP_FORMAT = 'shelfscan-backup';
 const BACKUP_VERSION = 1;
@@ -82,7 +84,7 @@ function readBackupBook(raw: unknown): Book | null {
   if (!isRecord(raw) || typeof raw.isbn13 !== 'string' || typeof raw.title !== 'string' || !raw.title.trim()) return null;
   const status = raw.status === 'reading' || raw.status === 'read' ? raw.status : 'unread';
   const rating = typeof raw.rating === 'number' && [1, 2, 3, 4, 5].includes(raw.rating) ? (raw.rating as Book['rating']) : undefined;
-  const source = raw.source === 'openlibrary' || raw.source === 'googlebooks' ? raw.source : 'manual';
+  const source = raw.source === 'openlibrary' || raw.source === 'googlebooks' || raw.source === 'dnb' ? raw.source : 'manual';
   return {
     id: typeof raw.id === 'string' ? raw.id : crypto.randomUUID(),
     isbn13: raw.isbn13,
@@ -99,6 +101,8 @@ function readBackupBook(raw: unknown): Book | null {
     rating,
     tags: stringList(raw.tags),
     hiddenTags: stringList(raw.hiddenTags),
+    moods: stringList(raw.moods),
+    infoSources: stringList(raw.infoSources).filter((s): s is InfoSource => INFO_SOURCES.includes(s as InfoSource)),
     notes: typeof raw.notes === 'string' ? raw.notes : undefined,
     dateAdded: typeof raw.dateAdded === 'number' ? raw.dateAdded : Date.now(),
     source,

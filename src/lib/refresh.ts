@@ -34,6 +34,7 @@ export async function refreshBook(book: Book, options: LookupOptions = {}, datab
     authors: book.authors.length ? book.authors : result?.authors ?? [],
     genres: union(book.genres, normalizeGenres(subjects)),
     tags: union(book.tags, deriveTags([...subjects, subtitle ?? ''], description, book.hiddenTags)),
+    infoSources: union(book.infoSources ?? [], result?.infoSources ?? []) as Book['infoSources'],
   };
 
   if (!book.coverBlob && result?.coverUrls.length) {
@@ -48,6 +49,7 @@ export async function refreshBook(book: Book, options: LookupOptions = {}, datab
     !sameList(book.genres, changes.genres ?? []) ||
     !sameList(book.tags, changes.tags ?? []) ||
     !sameList(book.authors, changes.authors ?? []) ||
+    !sameList(book.infoSources ?? [], changes.infoSources ?? []) ||
     book.description !== changes.description ||
     book.pageCount !== changes.pageCount ||
     Boolean(changes.coverBlob);

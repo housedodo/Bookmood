@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { deleteBook, updateBook, type Book, type ReadStatus } from '../data/db';
+import { deleteBook, updateBook, type Book, type InfoSource, type ReadStatus } from '../data/db';
 import { bookThemeStyle } from '../lib/bookTheme';
 import { refreshBook, type RefreshOutcome } from '../lib/refresh';
 import BookCover from './BookCover';
 import BookEditForm from './BookEditForm';
+import MoodChips from './MoodChips';
 import Icon from './Icon';
 import Rating from './Rating';
 import Sheet from './Sheet';
@@ -15,9 +16,17 @@ const STATUSES: { value: ReadStatus; label: string }[] = [
   { value: 'read', label: 'Read' },
 ];
 
+const INFO_SOURCE_LABEL: Record<InfoSource, string> = {
+  openlibrary: 'Open Library',
+  googlebooks: 'Google Books',
+  dnb: 'DNB',
+  wikipedia: 'Wikipedia',
+};
+
 const SOURCE_LABEL: Record<Book['source'], string> = {
   openlibrary: 'Open Library',
   googlebooks: 'Google Books',
+  dnb: 'Deutsche Nationalbibliothek',
   manual: 'added by hand',
 };
 
@@ -89,6 +98,12 @@ export default function BookDetail({ book, onClose }: { book: Book; onClose: () 
         ))}
       </div>
 
+      <section className="detail-section">
+        <h3>{book.status === 'read' ? 'How did it feel?' : 'What mood is this book?'}</h3>
+        <MoodChips selected={book.moods ?? []} onChange={(moods) => save({ moods })} label="Moods for this book" />
+        <p className="detail-hint">Moods you pick here count the most when you ask for a mood.</p>
+      </section>
+
       {book.genres.length > 0 && (
         <div className="detail-genres">
           {book.genres.map((genre) => (
@@ -138,7 +153,8 @@ export default function BookDetail({ book, onClose }: { book: Book; onClose: () 
       <section className="detail-section">
         <h3>Book info</h3>
         <p className="detail-info-line">
-          From {SOURCE_LABEL[book.source]} · {book.subjects.length} subject{book.subjects.length === 1 ? '' : 's'} ·{' '}
+          From {book.infoSources?.length ? book.infoSources.map((s) => INFO_SOURCE_LABEL[s]).join(' + ') : SOURCE_LABEL[book.source]} ·{' '}
+          {book.subjects.length} subject{book.subjects.length === 1 ? '' : 's'} ·{' '}
           {book.description ? 'description' : 'no description'}
           {book.subjects.length > 0 && (
             <>

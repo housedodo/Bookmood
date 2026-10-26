@@ -2,13 +2,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BookCover from '../components/BookCover';
 import HeartConfetti from '../components/HeartConfetti';
+import MoodChips from '../components/MoodChips';
 import IsbnLookup from '../components/IsbnLookup';
 import ManualAddForm from '../components/ManualAddForm';
 import Scanner from '../components/Scanner';
 import Sheet from '../components/Sheet';
 import TitleSearch from '../components/TitleSearch';
 import Toast, { type ToastData } from '../components/Toast';
-import { deleteBook, type Book } from '../data/db';
+import { deleteBook, updateBook, type Book } from '../data/db';
 import { addByIsbn, type AddByIsbnResult } from '../lib/addBook';
 import { createScanGate } from '../lib/barcode';
 import { bookThemeStyle } from '../lib/bookTheme';
@@ -109,6 +110,11 @@ export default function ScanPage() {
     else setManual({ title: result.title, authors: result.authors });
   };
 
+  const setMoods = (book: Book, moods: string[]) => {
+    void updateBook(book.id, { moods });
+    setAdded((list) => list.map((b) => (b.id === book.id ? { ...b, moods } : b)));
+  };
+
   const undo = async (book: Book) => {
     await deleteBook(book.id);
     setAdded((list) => list.filter((b) => b.id !== book.id));
@@ -151,17 +157,21 @@ export default function ScanPage() {
           {batch && <h2 className="scan-added-title">Added this session · {added.length}</h2>}
           {shownBooks.map((book) => (
             <div key={book.id} className="scan-card book-theme" style={bookThemeStyle(book.themeHue)}>
-              <BookCover book={book} className="scan-card-cover" />
-              <div className="scan-card-text">
-                <strong>{book.title}</strong>
-                {book.authors.length > 0 && <span>{book.authors.join(', ')}</span>}
-                <span className="hand">added to your shelf ♡</span>
+              <div className="scan-card-top">
+                <BookCover book={book} className="scan-card-cover" />
+                <div className="scan-card-text">
+                  <strong>{book.title}</strong>
+                  {book.authors.length > 0 && <span>{book.authors.join(', ')}</span>}
+                  <span className="hand">added to your shelf ♡</span>
+                </div>
+                {undoId === book.id && (
+                  <button type="button" className="btn btn-small btn-secondary scan-undo" onClick={() => undo(book)}>
+                    <span className="hand">Undo</span>
+                  </button>
+                )}
               </div>
-              {undoId === book.id && (
-                <button type="button" className="btn btn-small btn-secondary scan-undo" onClick={() => undo(book)}>
-                  <span className="hand">Undo</span>
-                </button>
-              )}
+              <span className="scan-card-moods-label">How does it feel? <small>(optional)</small></span>
+              <MoodChips selected={book.moods ?? []} onChange={(moods) => setMoods(book, moods)} label={`Moods for ${book.title}`} />
             </div>
           ))}
         </section>
