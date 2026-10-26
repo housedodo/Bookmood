@@ -1,4 +1,5 @@
-import { lookup, type LookupOptions } from '../src/lib/lookup';
+import { lookup, searchByTitle, type LookupOptions } from '../src/lib/lookup';
+import searchFixture from './fixtures/openlibrary-search-book-lovers.json';
 import olBook from './fixtures/openlibrary-9780593334836.json';
 import olEmpty from './fixtures/openlibrary-empty.json';
 import gbBook from './fixtures/googlebooks-9780593334836.json';
@@ -84,5 +85,31 @@ describe('lookup', () => {
       },
     };
     expect(await lookup(ISBN, options)).toMatchObject({ source: 'googlebooks' });
+  });
+});
+
+describe('searchByTitle', () => {
+  it('parses Open Library search results', async () => {
+    const fetchImpl: typeof fetch = async () => new Response(JSON.stringify(searchFixture), { status: 200 });
+    const results = await searchByTitle('book lovers', { fetchImpl });
+    expect(results).toHaveLength(3);
+    expect(results[0]).toEqual({
+      key: '/works/OL24337047W',
+      title: 'Book Lovers',
+      authors: ['Emily Henry'],
+      isbn13: '9780593334836',
+      year: 2022,
+      coverUrl: 'https://covers.openlibrary.org/b/id/12364437-S.jpg',
+    });
+    expect(results[1].isbn13).toBeUndefined(); // only an ISBN-10
+    expect(results[2].authors).toEqual([]);
+  });
+
+  it('returns [] for empty queries and failures', async () => {
+    const failing: typeof fetch = async () => {
+      throw new TypeError('offline');
+    };
+    expect(await searchByTitle('  ', { fetchImpl: failing })).toEqual([]);
+    expect(await searchByTitle('x', { fetchImpl: failing })).toEqual([]);
   });
 });

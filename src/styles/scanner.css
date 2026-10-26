@@ -1,0 +1,63 @@
+.viewfinder {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border: var(--outline);
+  border-radius: var(--radius-l);
+  background: var(--text);
+  box-shadow: 4px 4px 0 var(--text);
+}
+
+.viewfinder-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.viewfinder.is-paused .viewfinder-video {
+  opacity: 0.3;
+}
+
+/* Rounded cutout: everything outside the frame is dimmed by the big shadow. */
+.viewfinder-frame {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 26%;
+  bottom: 30%;
+  border-radius: 18px;
+  box-shadow: 0 0 0 999px rgba(75, 44, 60, 0.45);
+}
+
+.viewfinder-frame.flash {
+  animation: frame-flash 0.6s ease-out;
+}
+
+.corner {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 5px solid var(--pink-300);
+}
+
+.corner.tl { top: -3px; left: -3px; border-right: none; border-bottom: none; border-top-left-radius: 18px; }
+.corner.tr { top: -3px; right: -3px; border-left: none; border-bottom: none; border-top-right-radius: 18px; }
+.corner.bl { bottom: -3px; left: -3px; border-right: none; border-top: none; border-bottom-left-radius: 18px; }
+.corner.br { bottom: -3px; right: -3px; border-left: none; border-top: none; border-bottom-right-radius: 18px; }
+
+.viewfinder-help {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 10px;
+  margin: 0;
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(75, 44, 60, 0.8);
+}
+
+@keyframes frame-flash {
+  0%   { box-shadow: 0 0 0 999px rgba(255, 143, 184, 0.65), inset 0 0 0 6px var(--pink-300); }
+  100% { box-shadow: 0 0 0 999px rgba(75, 44, 60, 0.45), inset 0 0 0 0 var(--pink-300); }
+}

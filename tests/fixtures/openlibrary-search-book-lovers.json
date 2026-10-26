@@ -1,0 +1,27 @@
+{
+  "numFound": 3,
+  "start": 0,
+  "numFoundExact": true,
+  "docs": [
+    {
+      "key": "/works/OL24337047W",
+      "title": "Book Lovers",
+      "author_name": ["Emily Henry"],
+      "first_publish_year": 2022,
+      "cover_i": 12364437,
+      "isbn": ["0593334833", "9780593334836", "9780593440872"]
+    },
+    {
+      "key": "/works/OL123W",
+      "title": "The Book Lovers' Guide",
+      "author_name": ["A. Reader"],
+      "isbn": ["1234567890"]
+    },
+    {
+      "key": "/works/OL456W",
+      "title": "Book Lovers Anonymous"
+    }
+  ],
+  "q": "",
+  "offset": null
+}

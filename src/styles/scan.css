@@ -1,0 +1,151 @@
+.scan {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.scan-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.scan-header .page-subtitle {
+  margin-bottom: 0;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-top: 6px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.toggle-track {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  border: var(--outline);
+  border-radius: 999px;
+  background: var(--surface);
+  transition: background 0.15s;
+}
+
+.toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border: var(--outline);
+  border-radius: 50%;
+  background: var(--surface);
+  transition: transform 0.15s;
+}
+
+.toggle input:checked + .toggle-track {
+  background: var(--pink-400);
+}
+
+.toggle input:checked + .toggle-track::after {
+  transform: translateX(20px);
+}
+
+.toggle input:focus-visible + .toggle-track {
+  outline: 3px solid var(--pink-400);
+  outline-offset: 2px;
+}
+
+.scan-status {
+  margin: 0;
+  text-align: center;
+}
+
+.scan-added {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scan-added-title {
+  font-size: 1.05rem;
+}
+
+.scan-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
+  border: var(--outline);
+  border-radius: var(--radius-m);
+  background: var(--book-bg);
+  box-shadow: 4px 4px 0 var(--text);
+  animation: pop-in 0.35s ease-out;
+}
+
+.scan-card-cover {
+  flex-shrink: 0;
+  width: 56px;
+  aspect-ratio: 2 / 3;
+  font-size: 0.55rem;
+  padding: 4px;
+}
+
+.scan-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.scan-card-text strong {
+  font-family: var(--font-heading);
+  font-weight: 600;
+}
+
+.scan-card-text span {
+  font-size: 0.85rem;
+}
+
+.scan-card-text .hand {
+  font-size: 1.15rem;
+  color: var(--text-soft);
+}
+
+.scan-undo {
+  flex-shrink: 0;
+}
+
+.scan-backup {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border: var(--outline);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+}
+
+.scan-manual-hint {
+  margin: 0 0 12px;
+}
+
+@keyframes pop-in {
+  0%   { transform: scale(0.9); opacity: 0; }
+  60%  { transform: scale(1.03); opacity: 1; }
+  100% { transform: scale(1); }
+}

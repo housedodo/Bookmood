@@ -6,6 +6,8 @@ import '../styles/form.css';
 
 interface ManualAddFormProps {
   initialIsbn?: string;
+  initialTitle?: string;
+  initialAuthors?: string[];
   onAdded: (book: Book) => void;
   onDuplicate: (book: Book) => void;
 }
@@ -13,9 +15,9 @@ interface ManualAddFormProps {
 const splitList = (text: string) => text.split(',').map((s) => s.trim()).filter(Boolean);
 
 /** Hand-entry form. Only the title is required. */
-export default function ManualAddForm({ initialIsbn = '', onAdded, onDuplicate }: ManualAddFormProps) {
-  const [title, setTitle] = useState('');
-  const [authors, setAuthors] = useState('');
+export default function ManualAddForm({ initialIsbn = '', initialTitle = '', initialAuthors = [], onAdded, onDuplicate }: ManualAddFormProps) {
+  const [title, setTitle] = useState(initialTitle);
+  const [authors, setAuthors] = useState(initialAuthors.join(', '));
   const [pages, setPages] = useState('');
   const [isbn, setIsbn] = useState(initialIsbn);
   const [genres, setGenres] = useState('');

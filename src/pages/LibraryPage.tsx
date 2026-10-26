@@ -1,9 +1,10 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useCallback, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import BookCard from '../components/BookCard';
 import BookDetail from '../components/BookDetail';
 import FilterBar from '../components/FilterBar';
+import HeartConfetti from '../components/HeartConfetti';
 import Icon from '../components/Icon';
 import IsbnLookup from '../components/IsbnLookup';
 import ManualAddForm from '../components/ManualAddForm';
@@ -17,12 +18,16 @@ export default function LibraryPage() {
   const books = useLiveQuery(() => db.books.toArray(), []);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [sort, setSort] = useState<SortKey>('recent');
-  const [openId, setOpenId] = useState<string>();
+  // The open book lives in the URL (?book=<id>) so the Scan page can link to it and Back closes it.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const openId = searchParams.get('book') ?? undefined;
+  const setOpenId = useCallback((id?: string) => setSearchParams(id ? { book: id } : {}), [setSearchParams]);
   const [adding, setAdding] = useState(false);
   const [prefillIsbn, setPrefillIsbn] = useState('');
   const [toast, setToast] = useState<ToastData>();
+  const [confettiKey, setConfettiKey] = useState(0);
   const clearToast = useCallback(() => setToast(undefined), []);
-  const closeDetail = useCallback(() => setOpenId(undefined), []);
+  const closeDetail = useCallback(() => setOpenId(undefined), [setOpenId]);
   const closeAdd = useCallback(() => {
     setAdding(false);
     setPrefillIsbn('');
@@ -35,6 +40,7 @@ export default function LibraryPage() {
 
   const onAdded = (book: Book) => {
     closeAdd();
+    setConfettiKey((n) => n + 1);
     setToast({ message: `Added “${book.title}” ♡` });
   };
   const onDuplicate = (book: Book) => {
@@ -106,6 +112,7 @@ export default function LibraryPage() {
         </Sheet>
       )}
 
+      {confettiKey > 0 && <HeartConfetti key={confettiKey} />}
       {toast && <Toast toast={toast} onDone={clearToast} />}
     </main>
   );

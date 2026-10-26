@@ -15,7 +15,7 @@ const GENRE_RULES: GenreRule[] = [
   { genre: 'Crime', match: ['crime', 'murder'] },
   { genre: 'Horror', match: ['horror', 'ghost', 'haunted', 'vampire', 'supernatural'] },
   { genre: 'Historical Fiction', match: ['historical fiction', 'historical novel'] },
-  { genre: 'Literary Fiction', match: ['literary fiction', 'literary'] },
+  { genre: 'Literary Fiction', match: ['literary fiction', 'fiction, literary', 'literary novel'] },
   { genre: 'Contemporary', match: ['contemporary'] },
   { genre: 'Humor', match: ['humor', 'humour', 'humorous', 'comedy', 'satire'] },
   { genre: 'Young Adult', match: ['young adult', 'ya fiction', 'teen'] },

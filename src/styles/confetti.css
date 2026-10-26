@@ -1,0 +1,25 @@
+.confetti {
+  position: fixed;
+  left: 50%;
+  top: 45%;
+  z-index: 90;
+  pointer-events: none;
+}
+
+.confetti span {
+  position: absolute;
+  font-size: var(--size);
+  -webkit-text-stroke: 1px var(--text);
+  opacity: 0;
+  animation: heart-pop 1.2s ease-out var(--delay) forwards;
+}
+
+@keyframes heart-pop {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0.4); }
+  15%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--x), -180px) scale(1.1) rotate(20deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti { display: none; }
+}

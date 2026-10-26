@@ -12,8 +12,8 @@ Update this file at the end of every phase.
 | 2 | Data layer: `db.ts`, `isbn.ts`, `moods.ts`, `genres.ts` + tests | ✅ done |
 | 3 | Lookup (Open Library → Google Books) + cover download & theme hue + tests | ✅ done |
 | 4 | Library UI: manual add, BookCard, grid, search, filters, sort, BookDetail | ✅ done |
-| 5 | Scanner: camera, debounce, duplicates, undo, batch mode, confetti | ⏳ next |
-| 6 | Pick page: MoodPicker, `recommend.ts` + tests, results | — |
+| 5 | Scanner: camera, debounce, duplicates, undo, batch mode, confetti | ✅ done |
+| 6 | Pick page: MoodPicker, `recommend.ts` + tests, results | ⏳ next |
 | 7 | Settings (export/import), PWA, icons, polish, README | — |
 
 ## Running it
@@ -68,6 +68,12 @@ To switch direction later, the knobs are the CSS variables in `src/styles/theme.
 - **Length filter has an "Any length" chip**; books without a page count only show under "Any length".
 - **Status/length chips scroll sideways** on narrow phones instead of wrapping.
 - **Delete confirm** is inline in the sheet ("Really remove this book?" → Yes, delete / Keep it), not a browser popup.
+- **Scanner uses `BarcodeDetector` when the browser supports EAN-13** (Chrome on Android), else ZXing (iPhone Safari, desktop). Both feed the same ISBN check.
+- **Single vs batch mode:** in single mode the camera pauses after a book is added and shows **Scan another**; in batch mode it stays on and the added books stack in a list. The camera also pauses while the "Add it by hand" sheet is open.
+- **While a lookup is running, other scans are ignored** (they'll be picked up again on the next frame after it finishes).
+- **"Search by title"** uses Open Library search (`search.json?title=`) and takes the first ISBN-13 Open Library lists for that work — this may be a different edition than your copy. Results without any ISBN-13 open the manual form pre-filled with title + author.
+- **Opening a book from the Scan page** navigates to `/#/?book=<id>`: the open book lives in the URL (so the phone's Back button closes the sheet too).
+- **Toast texts use ♡ instead of 💗** (fewer emojis).
 - Library versions are current releases: React 19, Vite 8, Vitest 5, TypeScript 6, Dexie 4.
 
 ## What exists, file by file
@@ -109,11 +115,21 @@ To switch direction later, the knobs are the CSS variables in `src/styles/theme.
 - Per-book theme: put `className="book-theme"` + `style={bookThemeStyle(book.themeHue)}` on an element; inside it use `--book-bg`, `--book-accent`, `--book-strong`.
 - Tests: `tests/library.test.ts` (filter/sort), `tests/LibraryPage.test.tsx` (empty state, renders books + opens detail + changes status, status filter, manual add).
 
+### Phase 5 — Scanner
+- `src/lib/barcode.ts`: `startScanner(video, onIsbn)` → `{ stop }`; rejects with `'denied' | 'unavailable' | 'insecure'`. Back camera via `facingMode: { ideal: 'environment' }`. Only valid ISBN-13s reach `onIsbn`. `createScanGate(3000)`: the same ISBN is accepted at most once per 3 s.
+- `src/components/Scanner.tsx`: video + rounded cutout frame with pink corner brackets + helper text "Hold the barcode inside the frame ♡"; friendly messages for denied/no camera/not HTTPS; `active` prop starts/stops the camera; `flashKey` flashes the frame pink.
+- `src/pages/ScanPage.tsx`: scan → vibrate(80) + flash → `addByIsbn` → confirmation card (cover, title, author) with **Undo** for 5 s + heart confetti; duplicate → toast "Already in your library ♡" with **Open**; not found → "Add it by hand" sheet pre-filled with the ISBN; offline → friendly offline toast + manual sheet. Batch toggle. Backup: **Type ISBN** (`IsbnLookup`) and **Search by title** (`TitleSearch`).
+- `src/components/HeartConfetti.tsx`: 12 CSS hearts, 1.2 s; hidden with reduced motion. Also plays when adding from the Library page.
+- `searchByTitle()` + `parseTitleSearch()` in `src/lib/lookup.ts`.
+- Tests: `tests/barcode.test.ts` (3-second gate, camera error mapping), title search in `tests/lookup.test.ts` (fixture `openlibrary-search-book-lovers.json`).
+- **End-to-end check done in headless Chromium** with a fake camera showing a generated EAN-13 barcode (9780593334836) and mocked API answers: ZXing read the code, the book was saved with Undo, a second scan showed the duplicate toast, and Open jumped to the book in the Library.
+
 ## Known risks / to verify on a real phone
 
 - **Cover CORS:** covers are fetched with `fetch()` so the Blob can be stored. If a cover host doesn't send CORS headers, the download fails and the book falls back to the title hue and no stored cover. Check in Phase 5 with real scans.
 - **Google Books without an API key** has a shared anonymous quota and sometimes answers 429. That is handled (treated as "not found"), but lookups may then rely on Open Library alone.
-- Offline: `lookup` returns null when offline; the scan UI (Phase 5) should check `navigator.onLine` to show the friendly offline message instead of "not found".
+- **Camera on iPhone**: only tested in desktop Chromium with a fake camera. Needs a real test in iOS Safari (HTTPS link, allow camera, scan a few books). Focus on small barcodes can be slow on some phones — hold the book 15–25 cm away.
+- **BarcodeDetector path** (Android Chrome) is untested here — the test browser on Linux has no BarcodeDetector, so ZXing was used.
 
 ## How to make common changes
 

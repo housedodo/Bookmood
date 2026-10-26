@@ -140,3 +140,44 @@ export async function lookup(isbn13: string, options: LookupOptions = {}): Promi
   if (fromOpenLibrary) return mergeResults(fromOpenLibrary, fromGoogle);
   return fromGoogle;
 }
+
+// --- Search by title (Open Library search) ---
+
+export interface TitleSearchResult {
+  key: string;
+  title: string;
+  authors: string[];
+  /** First valid ISBN-13 of the work, if Open Library knows one. */
+  isbn13?: string;
+  year?: number;
+  coverUrl?: string;
+}
+
+export const titleSearchUrl = (query: string) =>
+  `https://openlibrary.org/search.json?title=${encodeURIComponent(query)}&limit=10&fields=key,title,author_name,isbn,first_publish_year,cover_i`;
+
+const ISBN13 = /^97[89]\d{10}$/;
+
+export function parseTitleSearch(data: unknown): TitleSearchResult[] {
+  if (!isObject(data) || !Array.isArray(data.docs)) return [];
+  return data.docs.filter(isObject).flatMap((doc) => {
+    const title = str(doc.title);
+    const key = str(doc.key);
+    if (!title || !key) return [];
+    const coverId = positiveInt(doc.cover_i);
+    return [{
+      key,
+      title,
+      authors: strings(doc.author_name),
+      isbn13: strings(doc.isbn).find((isbn) => ISBN13.test(isbn)),
+      year: positiveInt(doc.first_publish_year),
+      coverUrl: coverId ? `https://covers.openlibrary.org/b/id/${coverId}-S.jpg` : undefined,
+    }];
+  });
+}
+
+/** Finds books by title. Returns [] on any failure. */
+export async function searchByTitle(query: string, options: LookupOptions = {}): Promise<TitleSearchResult[]> {
+  if (!query.trim()) return [];
+  return parseTitleSearch(await fetchJson(titleSearchUrl(query.trim()), options));
+}
