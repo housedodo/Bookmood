@@ -1,0 +1,77 @@
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: grid;
+  /* Library, Pick | raised Scan | Settings (spans two columns to keep Scan centered) */
+  grid-template-columns: 1fr 1fr 84px 1fr 1fr;
+  align-items: end;
+  height: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
+  padding: 0 8px env(safe-area-inset-bottom);
+  background: var(--surface);
+  border-radius: var(--radius-l) var(--radius-l) 0 0;
+  box-shadow: 0 -6px 20px rgba(240, 106, 155, 0.15);
+}
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: var(--tabbar-height);
+  color: var(--text-soft);
+  text-decoration: none;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 0.8rem;
+  border-radius: var(--radius-m);
+  transition: color 0.15s;
+}
+
+.tab-emoji {
+  font-size: 1.4rem;
+  line-height: 1;
+  transition: transform 0.15s;
+}
+
+.tab.active {
+  color: var(--pink-500);
+}
+
+.tab.active .tab-emoji {
+  transform: translateY(-2px) scale(1.1);
+}
+
+.tab-settings {
+  grid-column: span 2;
+}
+
+.tab-scan {
+  align-self: start;
+  justify-self: center;
+  width: 72px;
+  height: 72px;
+  margin-top: -26px;
+  border-radius: 50%;
+  background: var(--pink-400);
+  color: #fff;
+  border: 5px solid var(--bg);
+  box-shadow: var(--shadow);
+  transition: background 0.15s, transform 0.1s;
+}
+
+.tab-scan .tab-emoji {
+  font-size: 1.7rem;
+}
+
+.tab-scan.active {
+  color: #fff;
+  background: var(--pink-500);
+}
+
+.tab-scan:active {
+  transform: translateY(1px);
+}
