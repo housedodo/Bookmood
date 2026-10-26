@@ -32,6 +32,7 @@ Before calling a phase done: `npm run lint` and `npm test` must both pass.
 
 - The repo is connected to Cloudflare **Workers** (not Pages). Build command `npm run build`, deploy command `npx wrangler deploy`.
 - `wrangler.jsonc` tells wrangler to serve the `dist/` folder as static assets, and turns on the `workers.dev` URL and per-branch preview URLs.
+- **Branches:** `main` = the app on the phone (Cloudflare's production branch, deploys to the `workers.dev` URL). Work happens on `claude/new-session-lujt8z` (gets Cloudflare *preview* URLs only); after a phase is approved, `main` is fast-forwarded to it.
 - The `name` in `wrangler.jsonc` (`bookmood`) **must match the Worker's name** in the Cloudflare dashboard, or the build fails.
 - If the dashboard says "No URLs": Worker → Settings → Domains & Routes → enable `workers.dev` (first time: pick an account subdomain under Workers & Pages).
 - HTTPS is included, which the camera (Phase 5) requires.
