@@ -164,3 +164,16 @@
   padding-top: 6px;
   border-top: 2px dashed var(--book-accent);
 }
+
+.detail-refresh {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.detail-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-soft);
+}

@@ -1,5 +1,7 @@
 import { lookup, searchByTitle, type LookupOptions } from '../src/lib/lookup';
 import searchFixture from './fixtures/openlibrary-search-book-lovers.json';
+import olEdition from './fixtures/openlibrary-edition-OL32334186M.json';
+import olWork from './fixtures/openlibrary-work-OL24337047W.json';
 import olBook from './fixtures/openlibrary-9780593334836.json';
 import olEmpty from './fixtures/openlibrary-empty.json';
 import gbBook from './fixtures/googlebooks-9780593334836.json';
@@ -85,6 +87,43 @@ describe('lookup', () => {
       },
     };
     expect(await lookup(ISBN, options)).toMatchObject({ source: 'googlebooks' });
+  });
+});
+
+describe('lookup with the Open Library work record', () => {
+  /** Answers by URL; anything unknown gets an empty object. */
+  const routes = (map: Record<string, unknown>): typeof fetch & { calls: string[] } => {
+    const calls: string[] = [];
+    const impl = async (input: RequestInfo | URL) => {
+      const url = String(input);
+      calls.push(url);
+      const match = Object.keys(map).find((part) => url.includes(part));
+      return new Response(JSON.stringify(match ? map[match] : {}), { status: 200 });
+    };
+    return Object.assign(impl, { calls }) as typeof fetch & { calls: string[] };
+  };
+
+  it('adds the work subjects and description, and skips Google when it has a description', async () => {
+    const fetchImpl = routes({
+      'api/books': olBook,
+      '/books/OL32334186M.json': olEdition,
+      '/works/OL24337047W.json': olWork,
+      googleapis: gbBook,
+    });
+    const result = await lookup(ISBN, { fetchImpl });
+
+    expect(result?.subjects).toEqual(expect.arrayContaining(['Love stories', 'Enemies to lovers', 'Sisters', 'North Carolina', '21st century']));
+    expect(result?.subjects).not.toContain('nyt:hardcover-fiction=2022-05-22');
+    expect(new Set(result?.subjects).size).toBe(result?.subjects.length);
+    expect(result?.description).toMatch(/rivals to lovers/);
+    expect(fetchImpl.calls.some((url) => url.includes('googleapis'))).toBe(false);
+  });
+
+  it('still works when the work record is missing', async () => {
+    const fetchImpl = routes({ 'api/books': olBook, googleapis: gbBook });
+    const result = await lookup(ISBN, { fetchImpl });
+    expect(result).toMatchObject({ title: 'Book Lovers', source: 'openlibrary' });
+    expect(result?.description).toMatch(/literary agent/); // from Google
   });
 });
 

@@ -1,0 +1,22 @@
+{
+  "key": "/works/OL24337047W",
+  "title": "Book Lovers",
+  "description": {
+    "type": "/type/text",
+    "value": "Nora is a cutthroat literary agent who spends a summer in a small town with her sister, where she keeps bumping into a brooding editor from the city. A rivals to lovers story about sisters and second chances."
+  },
+  "subjects": [
+    "Fiction",
+    "Love stories",
+    "Romance",
+    "Enemies to lovers",
+    "Sisters",
+    "Small town",
+    "nyt:hardcover-fiction=2022-05-22",
+    "New York Times bestseller",
+    "Fiction, romance, contemporary"
+  ],
+  "subject_places": ["North Carolina", "New York (N.Y.)"],
+  "subject_times": ["21st century"],
+  "type": { "key": "/type/work" }
+}

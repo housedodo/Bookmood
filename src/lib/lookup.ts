@@ -88,6 +88,52 @@ export function parseOpenLibrary(data: unknown, isbn13: string): LookupResult | 
   };
 }
 
+/** The edition key ("/books/OL…M") from a jscmd=data answer, used to find the work record. */
+export function openLibraryEditionKey(data: unknown, isbn13: string): string | undefined {
+  if (!isObject(data)) return undefined;
+  const book = data[`ISBN:${isbn13}`];
+  const key = isObject(book) ? str(book.key) : undefined;
+  return key?.startsWith('/books/') ? key : undefined;
+}
+
+export interface WorkInfo {
+  subjects: string[];
+  description?: string;
+}
+
+// Machine tags ("nyt:hardcover-fiction=2022-05-22") and very long entries don't help mood matching.
+const usefulSubject = (subject: string) => !/^[a-z_]+:/i.test(subject) && subject.length <= 60;
+
+/** Reads subjects (incl. places and time periods) and the description from a work record. */
+export function parseOpenLibraryWork(data: unknown): WorkInfo {
+  if (!isObject(data)) return { subjects: [] };
+  const subjects = [...strings(data.subjects), ...strings(data.subject_places), ...strings(data.subject_times)].filter(usefulSubject);
+  // The description is either a plain string or { type: "/type/text", value: "…" }.
+  const description = str(data.description) ?? (isObject(data.description) ? str(data.description.value) : undefined);
+  return { subjects: [...new Set(subjects)], description };
+}
+
+/**
+ * The edition record only has a few subjects. The work behind it ("all editions of this book")
+ * usually has many more, often including reader tropes, plus a description. Two small requests:
+ * edition → work key → work.
+ */
+export async function fetchOpenLibraryWork(editionKey: string, options: LookupOptions = {}): Promise<WorkInfo> {
+  const edition = await fetchJson(`https://openlibrary.org${editionKey}.json`, options);
+  const works = isObject(edition) && Array.isArray(edition.works) ? edition.works : [];
+  const workKey = isObject(works[0]) ? str(works[0].key) : undefined;
+  if (!workKey?.startsWith('/works/')) return { subjects: [] };
+  return parseOpenLibraryWork(await fetchJson(`https://openlibrary.org${workKey}.json`, options));
+}
+
+export function mergeWork(result: LookupResult, work: WorkInfo): LookupResult {
+  return {
+    ...result,
+    description: result.description ?? work.description,
+    subjects: [...new Set([...result.subjects, ...work.subjects])],
+  };
+}
+
 // --- Google Books ---
 
 export function parseGoogleBooks(data: unknown, isbn13: string): LookupResult | null {
@@ -128,11 +174,16 @@ export function mergeResults(primary: LookupResult, extra: LookupResult | null):
 
 /**
  * Looks up a book: Open Library first, then Google Books. Never throws; null means "not found".
- * When Open Library finds the book, Google Books is still asked to fill in the description,
- * which mood matching relies on.
+ * When Open Library finds the book, its work record adds subjects and a description; if there is
+ * still no description, Google Books is asked for one, because mood matching relies on it.
  */
 export async function lookup(isbn13: string, options: LookupOptions = {}): Promise<LookupResult | null> {
-  const fromOpenLibrary = parseOpenLibrary(await fetchJson(openLibraryUrl(isbn13), options), isbn13);
+  const openLibraryData = await fetchJson(openLibraryUrl(isbn13), options);
+  let fromOpenLibrary = parseOpenLibrary(openLibraryData, isbn13);
+  const editionKey = openLibraryEditionKey(openLibraryData, isbn13);
+  if (fromOpenLibrary && editionKey) {
+    fromOpenLibrary = mergeWork(fromOpenLibrary, await fetchOpenLibraryWork(editionKey, options));
+  }
   const fromGoogle = fromOpenLibrary?.description
     ? null
     : parseGoogleBooks(await fetchJson(googleBooksUrl(isbn13), options), isbn13);

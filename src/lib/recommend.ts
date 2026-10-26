@@ -1,5 +1,6 @@
 import type { Book } from '../data/db';
 import { MOODS } from '../data/moods';
+import { matchKeyword } from './text';
 
 export interface RecommendOptions {
   maxPages?: number;
@@ -31,13 +32,11 @@ export function seededRandom(seed: number): () => number {
   };
 }
 
-const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-// Whole words only, so "war" doesn't match "award" and "loss" doesn't match "glossy".
-const containsKeyword = (text: string, keyword: string) =>
-  new RegExp(`(?<![a-z])${escapeRegExp(keyword)}(?![a-z])`).test(text);
-
-/** Scores one book: keywords in title/subjects/genres/tags count 2, in the description only count 1. */
+/**
+ * Scores one book: keywords in title/subjects/genres/tags count 2, in the description only count 1.
+ * Keywords match whole words only ("war" doesn't match "award"); see matchKeyword.
+ */
 export function scoreBook(book: Book, moodIds: string[]): { score: number; matched: string[] } {
   const strongText = [book.title, ...book.subjects, ...book.genres, ...book.tags].join(' \n ').toLowerCase();
   const descriptionText = (book.description ?? '').toLowerCase();
@@ -46,10 +45,11 @@ export function scoreBook(book: Book, moodIds: string[]): { score: number; match
 
   for (const mood of MOODS.filter((m) => moodIds.includes(m.id))) {
     for (const keyword of mood.keywords) {
-      const points = containsKeyword(strongText, keyword) ? 2 : containsKeyword(descriptionText, keyword) ? 1 : 0;
-      if (!points) continue;
-      score += points;
-      if (!matched.includes(keyword)) matched.push(keyword);
+      const strong = matchKeyword(strongText, keyword);
+      const word = strong ?? matchKeyword(descriptionText, keyword);
+      if (!word) continue;
+      score += strong ? 2 : 1;
+      if (!matched.includes(word)) matched.push(word);
     }
   }
   return { score, matched };

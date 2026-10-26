@@ -1,0 +1,9 @@
+{
+  "key": "/books/OL32334186M",
+  "title": "Book Lovers",
+  "works": [{ "key": "/works/OL24337047W" }],
+  "isbn_13": ["9780593334836"],
+  "number_of_pages": 377,
+  "publishers": ["Berkley"],
+  "type": { "key": "/type/edition" }
+}

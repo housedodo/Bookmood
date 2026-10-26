@@ -155,6 +155,16 @@ To switch direction later, the knobs are the CSS variables in `src/styles/theme.
 - Tests: `tests/exportImport.test.ts`.
 - **Browser check done** (headless Chromium, 390px): service worker installs; manifest correct; after going offline and reloading, the library still shows its books and the Scan page loads; the offline lookup message shows; JSON + CSV export download; double-confirm delete; import shows "Added 1, skipped 0", re-import "Added 0, skipped 1".
 
+### After Phase 7 — Richer book info & German support
+- **Open Library work record** (`lookup.ts`): after the edition lookup, `fetchOpenLibraryWork(editionKey)` follows edition → work (`/books/OL…M.json` → `/works/OL…W.json`) and merges the work's `subjects`, `subject_places`, `subject_times` and `description`. Machine tags like `nyt:…` and very long subjects are dropped. Google Books is now only asked when there's still no description.
+- **Automatic trope tags** (`src/data/tropes.ts`): ~23 tags (enemies to lovers, rivals to lovers, friends to lovers, fake dating, second chance, grumpy sunshine, forced proximity, slow burn, forbidden love, love triangle, small town, found family, sports, coming of age, grief, dark academia, romantasy, christmas, royalty, mafia, time travel, witches, vampires), English + German patterns. `deriveTags(subjects, description, hiddenTags)` runs on every add and refresh. Tags count as strong (2 points) in mood scoring.
+- **Removed tags stay removed**: deleting a tag in the detail sheet stores it in `book.hiddenTags` (new optional field; included in JSON backups), so refresh won't add it back. Typing the tag again un-hides it.
+- **German**: every mood got German keywords; genres got German names (Liebesroman, Krimi, Jugendbuch, Ratgeber, Lyrik…). Matching (`src/lib/text.ts`) is umlaut-aware; a trailing `*` matches word starts for compounds (`liebes*` → Liebesroman). The Pick reason shows the real word found ("Matches: liebesgeschichte, kleinstadt").
+- **Moods gained trope keywords** (romantasy, fake dating, second chance*, slow burn…) — the spec's lists are still there, extended.
+- **Refresh book info** (`src/lib/refresh.ts`): `refreshBook` re-runs the lookup and only *adds* (subjects, genres, auto tags) or fills gaps (description, pages, authors, cover if missing); never touches title, your tags, notes, rating, status. Hand-added books just get tags/genres from what was typed. `refreshAll` goes one book at a time with a 300 ms pause, stops when offline. Buttons: **Refresh book info** in each book's sheet, **Refresh all books** in Settings with progress ("Refreshing… 12 / 40") and a summary toast.
+- Tests: `tests/refresh.test.ts`, `tests/text.test.ts`, work-record cases in `tests/lookup.test.ts`. Fixtures `openlibrary-edition-OL32334186M.json`, `openlibrary-work-OL24337047W.json` are hand-written in the real API shape.
+- **Browser check done**: a book with only "Literary agents" as subject didn't match Romance; after **Refresh all books** it showed "Matches: romance, love stories, enemies to lovers, rivals, rivals to lovers, second chance". A German hand-added book matched Romance via "liebesgeschichte".
+
 ## Known risks / to verify on a real phone
 
 - **Cover CORS:** covers are fetched with `fetch()` so the Blob can be stored. If a cover host doesn't send CORS headers, the download fails and the book falls back to the title hue and no stored cover. Check in Phase 5 with real scans.
@@ -167,7 +177,8 @@ To switch direction later, the knobs are the CSS variables in `src/styles/theme.
 
 ## How to make common changes
 
-- **Add/adjust a mood:** edit `MOODS` in `src/data/moods.ts` (keywords are lowercase, matched as substrings). Recommendation tests come in Phase 6.
+- **Add/adjust a mood:** edit `MOODS` in `src/data/moods.ts` (whole-word match; end a keyword with `*` to match word starts, e.g. German compounds).
+- **Add an automatic tag/trope:** add `{ tag, patterns }` to `TROPES` in `src/data/tropes.ts`; add a case to `tests/refresh.test.ts`. Existing books get it with **Refresh all books**. Recommendation tests come in Phase 6.
 - **Add a genre:** add a rule in `GENRE_RULES` in `src/data/genres.ts`; add a case to `tests/genres.test.ts`.
 - **Change colors / look:** CSS variables in `src/styles/theme.css`.
 - **Add an icon:** add a path string to `PATHS` in `src/components/Icon.tsx` (24×24 viewBox, stroke-only).

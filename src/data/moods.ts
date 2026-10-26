@@ -1,15 +1,56 @@
+// Keywords are matched as whole words, case-insensitive (see src/lib/text.ts).
+// A trailing "*" matches the start of a word, mainly for German compounds ("liebes*" → "Liebesroman").
+// Each list: the original English keywords, then trope keywords, then German ones.
 export const MOODS = [
-  { id: 'romance',    label: 'Romance',    emoji: '💕', keywords: ['romance','love story','love stories','romantic','enemies to lovers','rivals','sports romance','contemporary romance','m/m','lgbtq romance'] },
-  { id: 'happy',      label: 'Happy',      emoji: '🌞', keywords: ['humor','humorous','comedy','feel-good','feel good','romantic comedy','rom-com','friendship','uplifting'] },
-  { id: 'cozy',       label: 'Cozy',       emoji: '🧸', keywords: ['cozy','cosy','small town','bakery','village','slice of life','heartwarming','found family'] },
-  { id: 'funny',      label: 'Funny',      emoji: '😂', keywords: ['humor','humorous','comedy','satire','funny','witty'] },
-  { id: 'adventurous',label: 'Adventurous',emoji: '🗺️', keywords: ['adventure','quest','fantasy','epic','travel','survival','action'] },
-  { id: 'mysterious', label: 'Mysterious', emoji: '🔍', keywords: ['mystery','detective','crime','thriller','suspense','whodunit','murder'] },
-  { id: 'dark',       label: 'Dark',       emoji: '🌑', keywords: ['dark','horror','psychological','gothic','dystopian','noir','crime'] },
-  { id: 'emotional',  label: 'Emotional',  emoji: '🥹', keywords: ['grief','loss','family','coming of age','drama','death','tearjerker','war'] },
-  { id: 'thoughtful', label: 'Thoughtful', emoji: '💭', keywords: ['philosophy','literary','essays','psychology','science','history','non-fiction','nonfiction','biography','memoir'] },
-  { id: 'spooky',     label: 'Spooky',     emoji: '👻', keywords: ['horror','ghost','ghosts','haunted','supernatural','vampires','witches'] },
-  { id: 'inspiring',  label: 'Inspiring',  emoji: '✨', keywords: ['self-help','motivational','inspirational','success','personal growth','biography','memoir'] },
+  { id: 'romance', label: 'Romance', emoji: '💕', keywords: [
+    'romance', 'love story', 'love stories', 'romantic', 'enemies to lovers', 'rivals', 'sports romance', 'contemporary romance', 'm/m', 'lgbtq romance',
+    'romantasy', 'rivals to lovers', 'friends to lovers', 'fake dating', 'second chance*', 'slow burn', 'forbidden love', 'grumpy sunshine', 'forced proximity', 'love triangle',
+    'liebe', 'liebes*', 'romanze', 'romantisch*', 'verliebt*', 'verlieben', 'rivalen', 'feinde zu liebenden',
+  ] },
+  { id: 'happy', label: 'Happy', emoji: '🌞', keywords: [
+    'humor', 'humorous', 'comedy', 'feel-good', 'feel good', 'romantic comedy', 'rom-com', 'friendship', 'uplifting',
+    'humorvoll*', 'komödie', 'heiter*', 'gute laune', 'wohlfühl*', 'freundschaft*', 'herzerwärmend*',
+  ] },
+  { id: 'cozy', label: 'Cozy', emoji: '🧸', keywords: [
+    'cozy', 'cosy', 'small town', 'bakery', 'village', 'slice of life', 'heartwarming', 'found family',
+    'christmas', 'cozy mystery',
+    'gemütlich*', 'kleinstadt*', 'dorf', 'dorfes', 'bäckerei*', 'café', 'herzerwärmend*', 'wohlfühl*', 'wahlfamilie', 'weihnacht*',
+  ] },
+  { id: 'funny', label: 'Funny', emoji: '😂', keywords: [
+    'humor', 'humorous', 'comedy', 'satire', 'funny', 'witty',
+    'humorvoll*', 'lustig*', 'witzig*', 'komisch*', 'satiri*', 'komödie',
+  ] },
+  { id: 'adventurous', label: 'Adventurous', emoji: '🗺️', keywords: [
+    'adventure', 'quest', 'fantasy', 'epic', 'travel', 'survival', 'action',
+    'romantasy', 'time travel',
+    'abenteuer*', 'reise*', 'überleben*', 'episch*', 'expedition*', 'zeitreise*',
+  ] },
+  { id: 'mysterious', label: 'Mysterious', emoji: '🔍', keywords: [
+    'mystery', 'detective', 'crime', 'thriller', 'suspense', 'whodunit', 'murder',
+    'krimi*', 'kriminal*', 'mord', 'morde', 'mordes', 'mordfall', 'mörder*', 'detektiv*', 'kommissar*', 'ermittl*', 'spannung*', 'geheimnis*',
+  ] },
+  { id: 'dark', label: 'Dark', emoji: '🌑', keywords: [
+    'dark', 'horror', 'psychological', 'gothic', 'dystopian', 'noir', 'crime',
+    'dark academia', 'dark romance', 'mafia',
+    'düster*', 'psychothriller', 'dystopi*', 'abgrund*', 'gotisch*',
+  ] },
+  { id: 'emotional', label: 'Emotional', emoji: '🥹', keywords: [
+    'grief', 'loss', 'family', 'coming of age', 'drama', 'death', 'tearjerker', 'war',
+    'trauer*', 'verlust*', 'familie', 'familien*', 'erwachsenwerden', 'tod', 'todes', 'sterben', 'krieg*', 'schicksal*',
+  ] },
+  { id: 'thoughtful', label: 'Thoughtful', emoji: '💭', keywords: [
+    'philosophy', 'literary', 'essays', 'psychology', 'science', 'history', 'non-fiction', 'nonfiction', 'biography', 'memoir',
+    'philosoph*', 'essay*', 'psychologie', 'wissenschaft*', 'sachbuch*', 'biografie*', 'biographie*', 'zeitgeschichte',
+  ] },
+  { id: 'spooky', label: 'Spooky', emoji: '👻', keywords: [
+    'horror', 'ghost', 'ghosts', 'haunted', 'supernatural', 'vampires', 'witches',
+    'vampire', 'witch', 'paranormal',
+    'grusel*', 'gespenst*', 'geister', 'spuk*', 'übernatürlich*', 'vampir*', 'hexe', 'hexen*',
+  ] },
+  { id: 'inspiring', label: 'Inspiring', emoji: '✨', keywords: [
+    'self-help', 'motivational', 'inspirational', 'success', 'personal growth', 'biography', 'memoir',
+    'ratgeber*', 'selbsthilfe', 'motivation*', 'inspirier*', 'erfolg*', 'persönlichkeitsentwicklung', 'biografie*', 'mutig*',
+  ] },
 ] as const;
 
 export type Mood = (typeof MOODS)[number];

@@ -16,7 +16,8 @@ export interface Book {
   themeHue: number;           // 0-360, used for this book's pastel theme
   status: ReadStatus;
   rating?: 1 | 2 | 3 | 4 | 5;
-  tags: string[];             // user tags
+  tags: string[];             // user tags + automatic trope tags (see tropes.ts)
+  hiddenTags?: string[];      // automatic tags the reader removed; never re-added
   notes?: string;
   dateAdded: number;          // Date.now()
   source: BookSource;

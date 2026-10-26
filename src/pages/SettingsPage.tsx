@@ -3,6 +3,7 @@ import { useCallback, useRef, useState, type ChangeEvent } from 'react';
 import Toast, { type ToastData } from '../components/Toast';
 import { db } from '../data/db';
 import { downloadFile, exportCsv, exportJson, importJson } from '../lib/exportImport';
+import { refreshAll } from '../lib/refresh';
 import '../styles/settings.css';
 
 const builtAt = new Date(__BUILD_TIME__).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
@@ -15,6 +16,7 @@ export default function SettingsPage() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [deleteStep, setDeleteStep] = useState<DeleteStep>('idle');
+  const [progress, setProgress] = useState<{ done: number; total: number }>();
   const [toast, setToast] = useState<ToastData>();
   const clearToast = useCallback(() => setToast(undefined), []);
 
@@ -41,6 +43,15 @@ export default function SettingsPage() {
     } finally {
       setBusy(false);
     }
+  };
+
+  const refreshLibrary = async () => {
+    const books = await db.books.toArray();
+    setProgress({ done: 0, total: books.length });
+    const summary = await refreshAll(books, (done, total) => setProgress({ done, total }));
+    setProgress(undefined);
+    const counts = `Updated ${summary.updated}, nothing new for ${summary.unchanged}${summary.notFound ? `, ${summary.notFound} not found` : ''}`;
+    setToast({ message: summary.stoppedOffline ? `You're offline — stopped. ${counts}` : `${counts} ♡` });
   };
 
   const deleteAll = async () => {
@@ -76,6 +87,18 @@ export default function SettingsPage() {
         <button type="button" className="btn btn-secondary" onClick={() => fileInput.current?.click()} disabled={busy}>
           Import backup
         </button>
+      </section>
+
+      <section className="settings-card">
+        <h2>Book info</h2>
+        <p>
+          Fetch more subjects, trope tags (like "enemies to lovers" or "small town") and missing descriptions for every book, so
+          mood picks work better. Your own tags, notes and ratings stay as they are.
+        </p>
+        <button type="button" className="btn btn-secondary" onClick={refreshLibrary} disabled={busy || Boolean(progress) || !count}>
+          {progress ? `Refreshing… ${progress.done} / ${progress.total}` : 'Refresh all books'}
+        </button>
+        {progress && <p className="settings-hint">Keep this page open — it takes about a second per book.</p>}
       </section>
 
       <section className="settings-card settings-danger">

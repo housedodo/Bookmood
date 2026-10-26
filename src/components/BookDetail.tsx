@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { deleteBook, updateBook, type Book, type ReadStatus } from '../data/db';
 import { bookThemeStyle } from '../lib/bookTheme';
+import { refreshBook, type RefreshOutcome } from '../lib/refresh';
 import BookCover from './BookCover';
 import Icon from './Icon';
 import Rating from './Rating';
@@ -13,18 +14,37 @@ const STATUSES: { value: ReadStatus; label: string }[] = [
   { value: 'read', label: 'Read' },
 ];
 
+const REFRESH_TEXT: Record<RefreshOutcome, string> = {
+  updated: 'Found more ♡',
+  unchanged: 'Nothing new this time',
+  notFound: "Couldn't find it online",
+  offline: "You're offline",
+};
+
 export default function BookDetail({ book, onClose }: { book: Book; onClose: () => void }) {
   const [tagDraft, setTagDraft] = useState('');
   const [notes, setNotes] = useState(book.notes ?? '');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshResult, setRefreshResult] = useState<RefreshOutcome>();
+
+  const refresh = async () => {
+    setRefreshing(true);
+    setRefreshResult(await refreshBook(book));
+    setRefreshing(false);
+  };
 
   const save = (changes: Partial<Book>) => updateBook(book.id, changes);
 
   const addTag = () => {
     const tag = tagDraft.trim().toLowerCase();
-    if (tag && !book.tags.includes(tag)) save({ tags: [...book.tags, tag] });
+    if (tag && !book.tags.includes(tag)) save({ tags: [...book.tags, tag], hiddenTags: book.hiddenTags?.filter((t) => t !== tag) });
     setTagDraft('');
   };
+
+  // Remembered in hiddenTags, so "Refresh info" won't add an automatic tag back.
+  const removeTag = (tag: string) =>
+    save({ tags: book.tags.filter((t) => t !== tag), hiddenTags: [...new Set([...(book.hiddenTags ?? []), tag])] });
 
   const remove = async () => {
     await deleteBook(book.id);
@@ -67,7 +87,7 @@ export default function BookDetail({ book, onClose }: { book: Book; onClose: () 
         <h3>Tags</h3>
         <div className="tag-list">
           {book.tags.map((tag) => (
-            <button key={tag} type="button" className="tag" onClick={() => save({ tags: book.tags.filter((t) => t !== tag) })} aria-label={`Remove tag ${tag}`}>
+            <button key={tag} type="button" className="tag" onClick={() => removeTag(tag)} aria-label={`Remove tag ${tag}`}>
               {tag} <span aria-hidden="true">×</span>
             </button>
           ))}
@@ -97,6 +117,16 @@ export default function BookDetail({ book, onClose }: { book: Book; onClose: () 
           onBlur={() => notes !== (book.notes ?? '') && save({ notes: notes || undefined })}
           placeholder="little thoughts…"
         />
+      </section>
+
+      <section className="detail-section">
+        <div className="detail-refresh">
+          <button type="button" className="btn btn-small btn-secondary" onClick={refresh} disabled={refreshing}>
+            {refreshing ? 'Looking…' : 'Refresh book info'}
+          </button>
+          {refreshResult && <span className="hand">{REFRESH_TEXT[refreshResult]}</span>}
+        </div>
+        <p className="detail-hint">Fetches more subjects, tags and a description. Your own tags, notes and rating stay.</p>
       </section>
 
       <div className="detail-delete">

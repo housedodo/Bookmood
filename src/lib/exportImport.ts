@@ -97,6 +97,7 @@ function readBackupBook(raw: unknown): Book | null {
     status,
     rating,
     tags: stringList(raw.tags),
+    hiddenTags: stringList(raw.hiddenTags),
     notes: typeof raw.notes === 'string' ? raw.notes : undefined,
     dateAdded: typeof raw.dateAdded === 'number' ? raw.dateAdded : Date.now(),
     source,

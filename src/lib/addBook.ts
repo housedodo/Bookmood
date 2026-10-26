@@ -1,5 +1,6 @@
 import { addBook, findByIsbn, type Book } from '../data/db';
 import { normalizeGenres } from '../data/genres';
+import { deriveTags } from '../data/tropes';
 import { getCoverTheme, hueFromTitle } from './cover';
 import { lookup } from './lookup';
 
@@ -27,6 +28,7 @@ export async function addByIsbn(isbn13: string): Promise<AddByIsbnResult> {
       description: result.description,
       subjects: result.subjects,
       genres: normalizeGenres(result.subjects),
+      tags: deriveTags(result.subjects, result.description),
       coverBlob,
       themeHue,
       source: result.source,
@@ -65,6 +67,7 @@ export async function addManualBook(input: ManualBookInput): Promise<AddByIsbnRe
     description: input.description,
     subjects: input.genres,
     genres: normalizeGenres(input.genres),
+    tags: deriveTags(input.genres, input.description),
     themeHue: hueFromTitle(input.title),
     source: 'manual',
   });
