@@ -1,15 +1,17 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from '../src/App';
+import { db } from '../src/data/db';
 
 describe('App scaffold', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     window.location.hash = '';
+    await db.books.clear();
   });
 
-  it('shows the library empty state by default', () => {
+  it('shows the library empty state by default', async () => {
     render(<App />);
-    expect(screen.getByText(/Your shelf is empty/)).toBeInTheDocument();
+    expect(await screen.findByText(/Your shelf is empty/)).toBeInTheDocument();
   });
 
   it('navigates between tabs', async () => {

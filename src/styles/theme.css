@@ -142,3 +142,119 @@ button {
     transition: none !important;
   }
 }
+
+/* ---------- shared controls (design C) ---------- */
+
+.btn-secondary {
+  background: var(--surface);
+}
+
+.btn-secondary:active {
+  background: var(--pink-100);
+}
+
+.btn-small {
+  min-height: 36px;
+  padding: 0 14px;
+  font-size: 0.9rem;
+  box-shadow: var(--pop-s);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+  transform: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: var(--outline);
+  border-radius: 999px;
+  background: var(--surface);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--pink-300);
+  box-shadow: var(--pop-s);
+}
+
+.chip[aria-pressed='true']::before {
+  content: '♡';
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  border: var(--outline);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  font: 500 1rem var(--font-body);
+}
+
+.textarea {
+  min-height: 96px;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+.select {
+  appearance: none;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234B2C3C' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 18px;
+}
+
+.input:focus-visible,
+.select:focus-visible,
+.textarea:focus-visible,
+.btn:focus-visible,
+.chip:focus-visible {
+  outline: 3px solid var(--pink-400);
+  outline-offset: 2px;
+}
+
+.hand {
+  font-family: var(--font-hand);
+  font-weight: 600;
+  font-size: 1.3rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Per-book pastel theme: set --hue inline (bookThemeStyle), use these anywhere inside. */
+.book-theme {
+  --book-bg:     hsl(var(--hue) 85% 94%);
+  --book-accent: hsl(var(--hue) 75% 78%);
+  --book-strong: hsl(var(--hue) 60% 62%);
+}

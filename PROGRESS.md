@@ -11,8 +11,8 @@ Update this file at the end of every phase.
 | 1 | Scaffold: Vite + React + TS, theme, fonts, tab bar, 4 pages, lint + tests | ✅ done |
 | 2 | Data layer: `db.ts`, `isbn.ts`, `moods.ts`, `genres.ts` + tests | ✅ done |
 | 3 | Lookup (Open Library → Google Books) + cover download & theme hue + tests | ✅ done |
-| 4 | Library UI: manual add, BookCard, grid, search, filters, sort, BookDetail | ⏳ next |
-| 5 | Scanner: camera, debounce, duplicates, undo, batch mode, confetti | — |
+| 4 | Library UI: manual add, BookCard, grid, search, filters, sort, BookDetail | ✅ done |
+| 5 | Scanner: camera, debounce, duplicates, undo, batch mode, confetti | ⏳ next |
 | 6 | Pick page: MoodPicker, `recommend.ts` + tests, results | — |
 | 7 | Settings (export/import), PWA, icons, polish, README | — |
 
@@ -61,6 +61,13 @@ To switch direction later, the knobs are the CSS variables in `src/styles/theme.
 - **Cover URLs are a list**: Open Library's `?default=false` cover first, then Open Library's cover from the data, then Google's thumbnail (upgraded to https). Images under 1 KB are treated as "no cover" placeholders.
 - **`createImageBitmap(blob)` is called without resize options** (older iOS Safari ignores them); scaling to 32×32 happens in `drawImage`.
 - **Test fixtures are hand-written** in the exact Open Library / Google Books response shapes: the build sandbox could not reach those APIs (Open Library blocked; Google Books returned a quota error).
+- **"Type ISBN" lookup already lives in the Library's Add sheet** (spec puts it in Phase 5). It makes real lookups testable on the phone before the camera exists; Phase 5 reuses the same `IsbnLookup` component and `addByIsbn()`.
+- **Books added by hand without an ISBN** get `isbn13 = "manual:<uuid>"` (isbn13 is the unique index). The detail sheet hides such ISBNs.
+- **Manual "Genres" field**: the typed words are stored as `subjects` (so mood matching sees them) and run through `normalizeGenres` for `genres` (so the genre filter only shows clean names).
+- **Author A–Z sorts by surname** (last word of the first author), then title.
+- **Length filter has an "Any length" chip**; books without a page count only show under "Any length".
+- **Status/length chips scroll sideways** on narrow phones instead of wrapping.
+- **Delete confirm** is inline in the sheet ("Really remove this book?" → Yes, delete / Keep it), not a browser popup.
 - Library versions are current releases: React 19, Vite 8, Vitest 5, TypeScript 6, Dexie 4.
 
 ## What exists, file by file
@@ -92,6 +99,15 @@ To switch direction later, the knobs are the CSS variables in `src/styles/theme.
   - `hueFromBlob(blob)`: draws to a 32×32 canvas; returns null if the browser refuses (then the title hue is used).
 - Tests: `tests/lookup.test.ts` (OL success + GB description fill, OL-only, GB fallback, both empty → null, network/HTTP errors, timeout), `tests/cover.test.ts`.
 - Fixtures: `tests/fixtures/openlibrary-9780593334836.json`, `googlebooks-9780593334836.json`, `openlibrary-empty.json`, `googlebooks-empty.json`.
+
+### Phase 4 — Library UI
+- `src/pages/LibraryPage.tsx`: live list via `useLiveQuery` (dexie-react-hooks) so changes show instantly. Header with count ("N books, M waiting to be read") and an **Add** button; search box; `FilterBar`; grid; empty state ("Your shelf is empty. Scan your first book! 📚" + Scan / Add by hand); "No books match" state with Clear filters. Filters/sort are not persisted (reset on reload).
+- `src/lib/library.ts` (pure, tested): `filterBooks`, `sortBooks`, `lengthOf`, `libraryGenres`, `SORT_OPTIONS`, `DEFAULT_FILTERS`.
+- `src/lib/addBook.ts`: `addByIsbn(isbn13)` = duplicate check → `lookup` → `getCoverTheme` → `normalizeGenres` → save; returns `added | duplicate | notFound | offline`, never throws. `addManualBook(input)` for the form.
+- Components: `BookCard` (per-book tint, sticker cover, Reading/Read badge), `BookCover` (stored Blob via object URL, or a tinted title placeholder), `BookDetail` (bottom sheet: cover, authors, pages/ISBN, 5-heart rating — tap again to clear, status switch, genres, description, tags add/remove, notes saved on blur, delete with confirm), `FilterBar`, `ManualAddForm` (title required; validates ISBN-10/13), `IsbnLookup`, `Rating`, `Sheet` (generic bottom sheet; Esc/backdrop/X close; locks page scroll), `Toast` (top pill, 3 s, optional action button), `Icon`.
+- Styles: `bookcard.css`, `bookdetail.css`, `filterbar.css`, `form.css`, `library.css`, `sheet.css`, `toast.css`; shared `.chip`, `.input`, `.select`, `.textarea`, `.btn-small`, `.btn-secondary`, `.book-theme` in `theme.css`.
+- Per-book theme: put `className="book-theme"` + `style={bookThemeStyle(book.themeHue)}` on an element; inside it use `--book-bg`, `--book-accent`, `--book-strong`.
+- Tests: `tests/library.test.ts` (filter/sort), `tests/LibraryPage.test.tsx` (empty state, renders books + opens detail + changes status, status filter, manual add).
 
 ## Known risks / to verify on a real phone
 

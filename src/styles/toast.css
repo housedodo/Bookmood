@@ -1,0 +1,25 @@
+.toast {
+  position: fixed;
+  top: calc(14px + env(safe-area-inset-top));
+  left: 50%;
+  z-index: 100;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100vw - 32px);
+  padding: 6px 8px 6px 18px;
+  border: var(--outline);
+  border-radius: 999px;
+  background: var(--mint);
+  box-shadow: var(--pop);
+  animation: toast-in 0.25s ease-out;
+}
+
+.toast .hand {
+  font-size: 1.35rem;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translate(-50%, -12px); }
+}
