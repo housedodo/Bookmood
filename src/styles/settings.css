@@ -1,0 +1,53 @@
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings .page-subtitle {
+  margin-bottom: 0;
+}
+
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 18px;
+  border: var(--outline);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  box-shadow: 4px 4px 0 var(--text);
+}
+
+.settings-card h2 {
+  font-size: 1.2rem;
+}
+
+.settings-card p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.settings-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.settings-hint {
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+.settings-danger {
+  background: var(--peach);
+}
+
+.settings-about {
+  text-align: center;
+}
+
+.settings-about p {
+  margin: 0;
+}

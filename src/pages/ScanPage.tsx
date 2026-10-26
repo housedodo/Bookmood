@@ -18,6 +18,7 @@ import '../styles/scan.css';
 const UNDO_MS = 5000;
 
 interface ManualPrefill {
+  offline?: boolean;
   isbn?: string;
   title?: string;
   authors?: string[];
@@ -65,8 +66,7 @@ export default function ScanPage() {
       case 'duplicate':
         return onDuplicate(result.book);
       case 'offline':
-        setToast({ message: "You're offline — I'll need internet to find that book. You can add it manually!" });
-        return setManual({ isbn });
+        return setManual({ isbn, offline: true });
       case 'notFound':
         return setManual({ isbn });
     }
@@ -147,7 +147,7 @@ export default function ScanPage() {
       )}
 
       <section className="scan-backup">
-        <IsbnLookup onAdded={onAdded} onDuplicate={onDuplicate} onNotFound={(isbn) => setManual({ isbn })} />
+        <IsbnLookup onAdded={onAdded} onDuplicate={onDuplicate} onNotFound={(isbn) => setManual({ isbn, offline: !navigator.onLine })} />
         {showTitleSearch ? (
           <TitleSearch onPick={onPickTitle} />
         ) : (
@@ -158,7 +158,11 @@ export default function ScanPage() {
       {manual && (
         <Sheet title="Add it by hand" onClose={() => setManual(undefined)}>
           <p className="hand scan-manual-hint">
-            {manual.isbn ? "I couldn't find this book online. Fill in what you know ♡" : 'No ISBN for this one — fill in what you know ♡'}
+            {manual.offline
+              ? "You're offline — I'll need internet to find that book. You can add it manually!"
+              : manual.isbn
+                ? "I couldn't find this book online. Fill in what you know ♡"
+                : 'No ISBN for this one — fill in what you know ♡'}
           </p>
           <ManualAddForm initialIsbn={manual.isbn} initialTitle={manual.title} initialAuthors={manual.authors} onAdded={onAdded} onDuplicate={onDuplicate} />
         </Sheet>

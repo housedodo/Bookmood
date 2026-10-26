@@ -1,0 +1,79 @@
+# ShelfScan
+
+A cute, pastel, phone-first app for your own bookshelf. Scan a book's barcode to add it, sort and filter your library, and when you don't know what to read, tap a mood and get suggestions from your unread pile.
+
+- Free: no accounts, no backend, no API keys.
+- Private: your library lives only on your device (IndexedDB). Export a backup in Settings now and then.
+- Installable: add it to your home screen, and the library works offline.
+
+Book data comes from [Open Library](https://openlibrary.org) and [Google Books](https://books.google.com).
+
+## Run it locally
+
+You need [Node.js](https://nodejs.org) 22 or newer.
+
+```bash
+npm install        # once
+npm run dev        # start the dev server
+```
+
+Open the URL it prints (usually http://localhost:5173).
+
+Other commands:
+
+```bash
+npm test           # run the tests (no network needed)
+npm run lint       # eslint + type check
+npm run build      # production build into dist/
+npm run preview    # serve the production build
+```
+
+## Open it on your phone
+
+**Same Wi-Fi (quickest, but no camera):** run `npm run dev`. It prints a `Network:` address like `http://192.168.1.20:5173`. Open that on your phone. Everything works except the camera, because browsers only allow the camera on `https://` pages (or `localhost`). You can still use "Type ISBN" and "Search by title".
+
+**With the camera, through a free tunnel:** give the dev server a temporary HTTPS address, for example with [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/) (no account needed):
+
+```bash
+npm run dev
+# in a second terminal:
+npx cloudflared tunnel --url http://localhost:5173
+```
+
+Open the `https://….trycloudflare.com` link it prints on your phone and allow camera access. If Vite answers "Blocked request. This host is not allowed", add `server: { allowedHosts: ['.trycloudflare.com'] }` to `vite.config.ts`.
+
+**Easiest:** use the deployed version (below). It's always HTTPS.
+
+### Install it like an app
+
+- **iPhone (Safari):** Share button → **Add to Home Screen**.
+- **Android (Chrome):** menu ⋮ → **Install app** (or **Add to Home screen**).
+
+## Deploy for free on Cloudflare
+
+This repo is set up for **Cloudflare Workers** with static assets (`wrangler.jsonc` serves the `dist/` folder).
+
+1. Make a free account at [dash.cloudflare.com](https://dash.cloudflare.com).
+2. **Workers & Pages → Create → Import a repository**, then connect GitHub and choose this repo. If the repo isn't listed, allow the "Cloudflare Workers and Pages" GitHub app to access it (GitHub → Settings → Applications).
+3. Settings:
+   - Production branch: `main`
+   - Build command: `npm run build`
+   - Deploy command: `npx wrangler deploy`
+   - Root directory: `/`
+4. Deploy. Your app is at `https://bookmood.<your-subdomain>.workers.dev`. If the dashboard says "No URLs", turn on **workers.dev** under **Settings → Domains & Routes**.
+
+The Worker's name in the dashboard must match `"name"` in `wrangler.jsonc` (`bookmood`).
+
+From then on, every push to `main` redeploys automatically. Other branches get their own preview links. **Settings → "Version built …"** in the app shows which build your phone has.
+
+### Cloudflare Pages instead
+
+It also works as a plain static site: connect the repo under **Pages**, choose build command `npm run build` and output directory `dist`, and leave the deploy command empty. Netlify and GitHub Pages work the same way. Routing uses `#/…` URLs, so no server rewrites are needed.
+
+## How it's built
+
+Vite + React + TypeScript (strict), Dexie for IndexedDB, ZXing (plus the native `BarcodeDetector` where available) for scanning, `vite-plugin-pwa` for offline use, and plain CSS with variables. Fonts are bundled: Fredoka, Quicksand and Caveat.
+
+- `CLAUDE.md`: the original spec.
+- `PROGRESS.md`: what's built, the design decisions, and how to change common things (moods, genres, colors, icons).
+- Regenerate the app icons with `python3 scripts/make-icons.py` (needs Pillow).
