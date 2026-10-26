@@ -1,0 +1,9 @@
+// Cloudflare Workers static-assets config: serves the Vite build output.
+{
+  "name": "bookmood",
+  "compatibility_date": "2025-10-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
