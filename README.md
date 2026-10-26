@@ -77,3 +77,4 @@ Vite + React + TypeScript (strict), Dexie for IndexedDB, ZXing (plus the native 
 - `CLAUDE.md`: the original spec.
 - `PROGRESS.md`: what's built, the design decisions, and how to change common things (moods, genres, colors, icons).
 - Regenerate the app icons with `python3 scripts/make-icons.py` (needs Pillow).
+- "Read the back cover" uses [Tesseract.js](https://tesseract.projectnaptha.com/) on the phone. Its files are copied into `public/ocr/` by `scripts/copy-ocr.mjs`, which runs automatically before `npm run dev` and `npm run build`.

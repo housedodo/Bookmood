@@ -21,7 +21,7 @@ describe('recommend', () => {
   it('scores subject/genre matches 2 and description-only matches 1', () => {
     expect(scoreBook(book({ title: 'A', subjects: ['Mystery'] }), ['mysterious']).score).toBe(2);
     expect(scoreBook(book({ title: 'B', genres: ['Thriller'] }), ['mysterious']).score).toBe(2);
-    expect(scoreBook(book({ title: 'C', description: 'A twisty mystery.' }), ['mysterious']).score).toBe(1);
+    expect(scoreBook(book({ title: 'C', description: 'A quiet mystery.' }), ['mysterious']).score).toBe(1);
     // In both places still counts once, as the stronger match.
     expect(scoreBook(book({ title: 'D', subjects: ['Mystery'], description: 'A mystery.' }), ['mysterious']).score).toBe(2);
   });
@@ -55,9 +55,26 @@ describe('recommend', () => {
     expect(ids(recommend([bare], ['mysterious'], { jitter: 0 }))).toEqual(['No One Saw a Thing']);
   });
 
+  it('understands blurb language, e.g. a marketing subtitle', () => {
+    const b = book({ title: 'No One Saw a Thing', subtitle: 'The Twisty and Unputdownable New Crime Thriller from the Bestselling Author of All Her Fault' });
+    const [result] = recommend([b], ['mysterious'], { jitter: 0 });
+    expect(result.matched).toEqual(['crime', 'thriller', 'twisty', 'unputdownable']);
+    expect(result.score).toBe(8);
+  });
+
+  it('counts a word once per mood even if two keywords find it', () => {
+    const b = book({ title: 'X', description: 'Sie verlieben sich.' });
+    expect(scoreBook(b, ['romance']).score).toBe(1);
+  });
+
+  it('reads the back-cover blurb like the description', () => {
+    const b = book({ title: 'X', blurb: 'A heartbreaking, unforgettable story.' });
+    expect(recommend([b], ['emotional'], { jitter: 0 })[0].reason).toBe('Matches: heartbreaking, unforgettable');
+  });
+
   it('uses the (hidden) subtitle for matching', () => {
     const b = book({ title: 'No One Saw a Thing', subtitle: 'The twisty new crime thriller' });
-    expect(recommend([b], ['mysterious'], { jitter: 0 })[0]?.reason).toBe('Matches: crime, thriller');
+    expect(recommend([b], ['mysterious'], { jitter: 0 })[0]?.reason).toBe('Matches: crime, thriller, twisty');
   });
 
   it('matches whole words only', () => {

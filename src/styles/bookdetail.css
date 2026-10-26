@@ -188,16 +188,6 @@
   font-size: 0.85rem;
 }
 
-.link-button {
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--text);
-  font: inherit;
-  font-weight: 700;
-  text-decoration: underline;
-  cursor: pointer;
-}
 
 .detail-subjects {
   margin: 0;
@@ -214,4 +204,22 @@
   background: var(--peach);
   font-size: 1.15rem;
   line-height: 1.25;
+}
+
+.detail-blurb {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-blurb-label {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--text-soft);
+}
+
+.detail-blurb p {
+  margin: 0;
+  line-height: 1.55;
 }

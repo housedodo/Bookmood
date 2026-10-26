@@ -44,15 +44,18 @@ export function seededRandom(seed: number): () => number {
  */
 export function scoreBook(book: Book, moodIds: string[]): { score: number; matched: string[]; yourMoods: string[] } {
   const strongText = [book.title, book.subtitle ?? '', ...book.subjects, ...book.genres, ...book.tags].join(' \n ').toLowerCase();
-  const descriptionText = (book.description ?? '').toLowerCase();
+  const descriptionText = [book.description ?? '', book.blurb ?? ''].join(' \n ').toLowerCase();
   let score = 0;
   const matched: string[] = [];
 
   for (const mood of MOODS.filter((m) => moodIds.includes(m.id))) {
+    // Two keywords can find the same word ("verlieben", "verliebe*"); count it once per mood.
+    const counted = new Set<string>();
     for (const keyword of mood.keywords) {
       const strong = matchKeyword(strongText, keyword);
       const word = strong ?? matchKeyword(descriptionText, keyword);
-      if (!word) continue;
+      if (!word || counted.has(word)) continue;
+      counted.add(word);
       score += strong ? 2 : 1;
       if (!matched.includes(word)) matched.push(word);
     }

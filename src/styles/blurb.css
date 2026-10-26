@@ -1,0 +1,30 @@
+.blurb-photo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.blurb-status,
+.blurb-failed p {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.blurb-failed {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.blurb-review {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.blurb-text {
+  min-height: 160px;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}

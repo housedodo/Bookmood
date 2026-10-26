@@ -29,3 +29,7 @@
   font-size: 0.9rem;
   font-weight: 600;
 }
+
+.chip-needs-info {
+  background: var(--peach);
+}

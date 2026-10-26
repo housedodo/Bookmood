@@ -184,18 +184,31 @@
   gap: 14px;
 }
 
-.scan-card-moods-label {
-  font-family: var(--font-heading);
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-.scan-card-moods-label small {
-  font-weight: 500;
-  color: var(--text-soft);
-}
 
 .scan-card .mood-chips {
   margin: 0 -12px;
   padding: 2px 12px 6px;
+}
+
+.scan-card-thin {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 2px dashed var(--book-strong);
+  border-radius: 14px;
+}
+
+.scan-card-thin .hand,
+.scan-card-ok {
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+
+.scan-card-moods-link {
+  align-self: flex-start;
+  min-height: 32px;
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
 }

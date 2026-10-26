@@ -101,3 +101,61 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
+
+.pick-unknown {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border: 2px dashed var(--text);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+}
+
+.pick-unknown h2 {
+  font-size: 1.05rem;
+}
+
+.pick-unknown .hand {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--text-soft);
+}
+
+.pick-unknown-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  margin: 4px -16px 0;
+  padding: 4px 16px 8px;
+}
+
+.pick-unknown-book {
+  flex: 0 0 84px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pick-unknown-book .cover {
+  font-size: 0.6rem;
+  padding: 5px;
+}
+
+.pick-unknown-book > span {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.75rem;
+  line-height: 1.15;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

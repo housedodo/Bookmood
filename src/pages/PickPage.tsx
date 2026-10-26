@@ -6,6 +6,9 @@ import MoodPicker from '../components/MoodPicker';
 import PickResult from '../components/PickResult';
 import Toast, { type ToastData } from '../components/Toast';
 import { db, updateBook, type Book } from '../data/db';
+import BookCover from '../components/BookCover';
+import { bookThemeStyle } from '../lib/bookTheme';
+import { moodUnknown } from '../lib/moodInfo';
 import { recommend, surprise } from '../lib/recommend';
 import { notNowIds } from '../lib/session';
 import '../styles/pick.css';
@@ -42,6 +45,7 @@ export default function PickPage() {
     [books, moods, maxPages, seed, shownBefore, hiddenCount],
   );
   const unreadCount = books?.filter((b) => b.status === 'unread').length ?? 0;
+  const moodUnknownBooks = useMemo(() => (books ?? []).filter((b) => b.status === 'unread' && moodUnknown(b)), [books]);
   const shownSurprise = surprisePick && books?.find((b) => b.id === surprisePick.id && b.status === 'unread');
 
   const resetRound = () => {
@@ -146,6 +150,21 @@ export default function PickPage() {
             <div className="pick-buttons">
               <button type="button" className="btn btn-secondary" onClick={pickSurprise}>Just surprise me</button>
             </div>
+          )}
+
+          {moodUnknownBooks.length > 0 && (
+            <section className="pick-unknown" aria-label="Books with unknown mood">
+              <h2>I can't tell the mood of {moodUnknownBooks.length === 1 ? 'this book' : `these ${moodUnknownBooks.length} books`} yet</h2>
+              <p className="hand">Open one and snap its back cover — then it can show up here ♡</p>
+              <div className="pick-unknown-row">
+                {moodUnknownBooks.map((book) => (
+                  <button key={book.id} type="button" className="pick-unknown-book book-theme" style={bookThemeStyle(book.themeHue)} onClick={() => open(book)}>
+                    <BookCover book={book} />
+                    <span>{book.title}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
           )}
         </>
       )}

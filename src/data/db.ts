@@ -13,6 +13,7 @@ export interface Book {
   authors: string[];
   pageCount?: number;
   description?: string;
+  blurb?: string;             // back-cover text read from a photo (counts like the description)
   subjects: string[];         // raw subjects from the API
   genres: string[];           // cleaned genres (see genres.ts)
   coverBlob?: Blob;           // cover image stored locally

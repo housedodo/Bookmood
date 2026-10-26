@@ -22,9 +22,11 @@ interface FilterBarProps {
   sort: SortKey;
   onSortChange: (sort: SortKey) => void;
   genres: string[];
+  /** How many books the app can't tell the mood of; the filter chip only shows when there are some. */
+  moodUnknownCount: number;
 }
 
-export default function FilterBar({ filters, onChange, sort, onSortChange, genres }: FilterBarProps) {
+export default function FilterBar({ filters, onChange, sort, onSortChange, genres, moodUnknownCount }: FilterBarProps) {
   const set = (changes: Partial<LibraryFilters>) => onChange({ ...filters, ...changes });
 
   return (
@@ -43,6 +45,18 @@ export default function FilterBar({ filters, onChange, sort, onSortChange, genre
           </button>
         ))}
       </div>
+      {(moodUnknownCount > 0 || filters.needsMoodInfo) && (
+        <div className="chip-row">
+          <button
+            type="button"
+            className="chip chip-needs-info"
+            aria-pressed={filters.needsMoodInfo}
+            onClick={() => set({ needsMoodInfo: !filters.needsMoodInfo })}
+          >
+            Mood unknown ({moodUnknownCount})
+          </button>
+        </div>
+      )}
       <div className="filter-selects">
         <label className="visually-hidden" htmlFor="genre-filter">Genre</label>
         <select id="genre-filter" className="select" value={filters.genre} onChange={(e) => set({ genre: e.target.value })}>

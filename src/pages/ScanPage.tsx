@@ -2,14 +2,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BookCover from '../components/BookCover';
 import HeartConfetti from '../components/HeartConfetti';
-import MoodChips from '../components/MoodChips';
+import ScanCardExtras from '../components/ScanCardExtras';
 import IsbnLookup from '../components/IsbnLookup';
 import ManualAddForm from '../components/ManualAddForm';
 import Scanner from '../components/Scanner';
 import Sheet from '../components/Sheet';
 import TitleSearch from '../components/TitleSearch';
 import Toast, { type ToastData } from '../components/Toast';
-import { deleteBook, updateBook, type Book } from '../data/db';
+import { db, deleteBook, updateBook, type Book } from '../data/db';
 import { addByIsbn, type AddByIsbnResult } from '../lib/addBook';
 import { createScanGate } from '../lib/barcode';
 import { bookThemeStyle } from '../lib/bookTheme';
@@ -115,6 +115,12 @@ export default function ScanPage() {
     setAdded((list) => list.map((b) => (b.id === book.id ? { ...b, moods } : b)));
   };
 
+  // Re-reads a just-added book after something else changed it (e.g. back-cover text saved).
+  const refreshAdded = async (id: string) => {
+    const fresh = await db.books.get(id);
+    if (fresh) setAdded((list) => list.map((b) => (b.id === id ? fresh : b)));
+  };
+
   const undo = async (book: Book) => {
     await deleteBook(book.id);
     setAdded((list) => list.filter((b) => b.id !== book.id));
@@ -170,8 +176,7 @@ export default function ScanPage() {
                   </button>
                 )}
               </div>
-              <span className="scan-card-moods-label">How does it feel? <small>(optional)</small></span>
-              <MoodChips selected={book.moods ?? []} onChange={(moods) => setMoods(book, moods)} label={`Moods for ${book.title}`} />
+              <ScanCardExtras book={book} onMoods={(moods) => setMoods(book, moods)} onBlurbSaved={() => refreshAdded(book.id)} />
             </div>
           ))}
         </section>

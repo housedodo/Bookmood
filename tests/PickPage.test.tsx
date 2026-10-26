@@ -33,4 +33,14 @@ describe('PickPage', () => {
     expect(screen.getByText(/Nothing in your unread pile matches this mood yet/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Surprise me' })).toBeInTheDocument();
   });
+
+  it('lists unread books whose mood it can’t tell, so they aren’t invisible', async () => {
+    await addBook({ isbn13: '4', title: 'No One Saw a Thing', authors: ['Andrea Mara'], source: 'openlibrary' });
+    await addBook({ isbn13: '5', title: 'Cold Case', subjects: ['Mystery'], source: 'manual' });
+    renderPage();
+    const row = await screen.findByRole('region', { name: 'Books with unknown mood' });
+    expect(within(row).getByText(/this book/)).toBeInTheDocument();
+    expect(within(row).getByRole('button', { name: /No One Saw a Thing/ })).toBeInTheDocument();
+    expect(within(row).queryByRole('button', { name: /Cold Case/ })).not.toBeInTheDocument();
+  });
 });

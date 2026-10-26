@@ -32,6 +32,11 @@ describe('library filters', () => {
     expect(titles(filterBooks(books, { ...DEFAULT_FILTERS, genre: 'Romance', length: 'long' }))).toEqual(['The Long War']);
   });
 
+  it('filters books whose mood is unknown', () => {
+    const mystery = book({ title: 'Bare Book' });
+    expect(titles(filterBooks([...books, mystery], { ...DEFAULT_FILTERS, needsMoodInfo: true }))).toEqual(['No Pages', 'Bare Book']);
+  });
+
   it('sorts', () => {
     expect(titles(sortBooks(books, 'recent'))).toEqual(['No Pages', 'Book Lovers', 'The Long War', 'apple tales']);
     expect(titles(sortBooks(books, 'title'))).toEqual(['apple tales', 'Book Lovers', 'No Pages', 'The Long War']);

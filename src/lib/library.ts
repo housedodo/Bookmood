@@ -1,4 +1,5 @@
 import type { Book, ReadStatus } from '../data/db';
+import { moodUnknown } from './moodInfo';
 
 export type LengthFilter = 'any' | 'short' | 'medium' | 'long';
 export type SortKey = 'recent' | 'title' | 'author' | 'pagesAsc' | 'pagesDesc';
@@ -8,9 +9,11 @@ export interface LibraryFilters {
   status: ReadStatus | 'all';
   genre: string; // '' = all genres
   length: LengthFilter;
+  /** Only books whose mood the app can't tell yet. */
+  needsMoodInfo: boolean;
 }
 
-export const DEFAULT_FILTERS: LibraryFilters = { query: '', status: 'all', genre: '', length: 'any' };
+export const DEFAULT_FILTERS: LibraryFilters = { query: '', status: 'all', genre: '', length: 'any', needsMoodInfo: false };
 
 export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: 'recent', label: 'Recently added' },
@@ -34,6 +37,7 @@ export function filterBooks(books: Book[], filters: LibraryFilters): Book[] {
     if (filters.status !== 'all' && book.status !== filters.status) return false;
     if (filters.genre && !book.genres.includes(filters.genre)) return false;
     if (filters.length !== 'any' && lengthOf(book.pageCount) !== filters.length) return false;
+    if (filters.needsMoodInfo && !moodUnknown(book)) return false;
     if (query) {
       const haystack = [book.title, ...book.authors].join(' ').toLowerCase();
       if (!haystack.includes(query)) return false;

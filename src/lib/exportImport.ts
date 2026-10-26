@@ -93,6 +93,7 @@ function readBackupBook(raw: unknown): Book | null {
     authors: stringList(raw.authors),
     pageCount: typeof raw.pageCount === 'number' && raw.pageCount > 0 ? raw.pageCount : undefined,
     description: typeof raw.description === 'string' ? raw.description : undefined,
+    blurb: typeof raw.blurb === 'string' ? raw.blurb : undefined,
     subjects: stringList(raw.subjects),
     genres: stringList(raw.genres),
     coverBlob: typeof raw.cover === 'string' ? dataUrlToBlob(raw.cover) : undefined,

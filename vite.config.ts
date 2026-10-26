@@ -28,6 +28,16 @@ export default defineConfig({
       workbox: {
         // App shell + bundled fonts, so the library opens offline. Book lookups stay network-only.
         globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
+        // The back-cover reader (~16 MB) is only downloaded when first used, then kept in its own cache.
+        globIgnores: ['ocr/**'],
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.includes('/ocr/'),
+            handler: 'CacheFirst',
+            options: { cacheName: 'ocr', expiration: { maxEntries: 10 } },
+          },
+        ],
         navigateFallback: 'index.html',
       },
     }),

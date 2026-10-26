@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { deleteBook, updateBook, type Book, type InfoSource, type ReadStatus } from '../data/db';
 import { bookThemeStyle } from '../lib/bookTheme';
+import { moodUnknown } from '../lib/moodInfo';
 import { refreshBook, type RefreshOutcome } from '../lib/refresh';
 import BookCover from './BookCover';
 import BookEditForm from './BookEditForm';
+import BlurbPhoto from './BlurbPhoto';
 import MoodChips from './MoodChips';
 import Icon from './Icon';
 import Rating from './Rating';
@@ -72,7 +74,7 @@ export default function BookDetail({ book, onClose }: { book: Book; onClose: () 
   const isbn = book.isbn13.startsWith('manual:') ? undefined : book.isbn13;
   const meta = [book.pageCount && `${book.pageCount} pages`, isbn && `ISBN ${isbn}`].filter(Boolean).join(' · ');
   // Mood picks need words to match; tell the reader when the lookup found next to nothing.
-  const thinInfo = book.subjects.length + book.genres.length < 2 && !book.description;
+  const thinInfo = moodUnknown(book);
 
   return (
     <Sheet title={book.title} onClose={onClose} className="book-theme book-detail" style={bookThemeStyle(book.themeHue)}>
@@ -113,6 +115,12 @@ export default function BookDetail({ book, onClose }: { book: Book; onClose: () 
       )}
 
       {book.description && <p className="detail-description">{book.description}</p>}
+      {book.blurb && (
+        <div className="detail-blurb">
+          <span className="detail-blurb-label">From the back cover</span>
+          <p>{book.blurb}</p>
+        </div>
+      )}
 
       <section className="detail-section">
         <h3>Tags</h3>
@@ -168,10 +176,11 @@ export default function BookDetail({ book, onClose }: { book: Book; onClose: () 
         {showSubjects && <p className="detail-subjects">{book.subjects.join(' · ')}</p>}
         {thinInfo && (
           <p className="detail-thin hand">
-            Not much info was found online for this book, so mood picks can't see what it's about. Add a few tags yourself
-            (e.g. thriller, twisty, romance) — they count for moods ♡
+            I can't tell this book's mood yet — not much was found online. Take a photo of the back cover, or add a few tags
+            (e.g. thriller, twisty, romance) ♡
           </p>
         )}
+        <BlurbPhoto book={book} compact={thinInfo} />
         <div className="detail-refresh">
           <button type="button" className="btn btn-small btn-secondary" onClick={refresh} disabled={refreshing}>
             {refreshing ? 'Looking…' : 'Refresh book info'}

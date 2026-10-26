@@ -11,6 +11,7 @@ import ManualAddForm from '../components/ManualAddForm';
 import Sheet from '../components/Sheet';
 import Toast, { type ToastData } from '../components/Toast';
 import { db, type Book } from '../data/db';
+import { moodUnknown } from '../lib/moodInfo';
 import { DEFAULT_FILTERS, filterBooks, libraryGenres, sortBooks, type SortKey } from '../lib/library';
 import '../styles/library.css';
 
@@ -35,6 +36,7 @@ export default function LibraryPage() {
 
   const shown = useMemo(() => sortBooks(filterBooks(books ?? [], filters), sort), [books, filters, sort]);
   const genres = useMemo(() => libraryGenres(books ?? []), [books]);
+  const moodUnknownCount = useMemo(() => (books ?? []).filter(moodUnknown).length, [books]);
   const openBook = books?.find((book) => book.id === openId);
   const unread = books?.filter((book) => book.status === 'unread').length ?? 0;
 
@@ -86,7 +88,7 @@ export default function LibraryPage() {
               placeholder="Search title or author"
             />
           </label>
-          <FilterBar filters={filters} onChange={setFilters} sort={sort} onSortChange={setSort} genres={genres} />
+          <FilterBar filters={filters} onChange={setFilters} sort={sort} onSortChange={setSort} genres={genres} moodUnknownCount={moodUnknownCount} />
           {shown.length === 0 ? (
             <div className="placeholder">
               <p className="placeholder-text">No books match these filters.</p>
