@@ -258,3 +258,9 @@ button {
   --book-accent: hsl(var(--hue) 75% 78%);
   --book-strong: hsl(var(--hue) 60% 62%);
 }
+
+.build-info {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-soft);
+}
