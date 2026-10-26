@@ -1,18 +1,19 @@
 import { NavLink } from 'react-router-dom';
+import Icon, { type IconName } from './Icon';
 import '../styles/tabbar.css';
 
 interface Tab {
   to: string;
   label: string;
-  emoji: string;
+  icon: IconName;
   className?: string;
 }
 
 const TABS: Tab[] = [
-  { to: '/', label: 'Library', emoji: '📚' },
-  { to: '/pick', label: 'Pick', emoji: '💕' },
-  { to: '/scan', label: 'Scan', emoji: '📷', className: 'tab-scan' },
-  { to: '/settings', label: 'Settings', emoji: '⚙️', className: 'tab-settings' },
+  { to: '/', label: 'Library', icon: 'library' },
+  { to: '/pick', label: 'Pick', icon: 'heart' },
+  { to: '/scan', label: 'Scan', icon: 'scan', className: 'tab-scan' },
+  { to: '/settings', label: 'Settings', icon: 'settings', className: 'tab-settings' },
 ];
 
 export default function TabBar() {
@@ -26,7 +27,7 @@ export default function TabBar() {
           aria-label={tab.label}
           className={({ isActive }) => ['tab', tab.className, isActive && 'active'].filter(Boolean).join(' ')}
         >
-          <span className="tab-emoji" aria-hidden="true">{tab.emoji}</span>
+          <Icon name={tab.icon} className="tab-icon" />
           {tab.className !== 'tab-scan' && <span>{tab.label}</span>}
         </NavLink>
       ))}

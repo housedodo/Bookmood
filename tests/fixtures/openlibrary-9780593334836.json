@@ -1,0 +1,29 @@
+{
+  "ISBN:9780593334836": {
+    "url": "https://openlibrary.org/books/OL32334186M/Book_Lovers",
+    "key": "/books/OL32334186M",
+    "title": "Book Lovers",
+    "authors": [
+      { "url": "https://openlibrary.org/authors/OL7376003A/Emily_Henry", "name": "Emily Henry" }
+    ],
+    "number_of_pages": 377,
+    "identifiers": {
+      "isbn_13": ["9780593334836"],
+      "isbn_10": ["0593334833"],
+      "openlibrary": ["OL32334186M"]
+    },
+    "publishers": [{ "name": "Berkley" }],
+    "publish_date": "May 03, 2022",
+    "subjects": [
+      { "name": "Love stories", "url": "https://openlibrary.org/subjects/love_stories" },
+      { "name": "Fiction, romance, contemporary", "url": "https://openlibrary.org/subjects/fiction,_romance,_contemporary" },
+      { "name": "Small town", "url": "https://openlibrary.org/subjects/small_town" },
+      { "name": "Literary agents", "url": "https://openlibrary.org/subjects/literary_agents" }
+    ],
+    "cover": {
+      "small": "https://covers.openlibrary.org/b/id/12364437-S.jpg",
+      "medium": "https://covers.openlibrary.org/b/id/12364437-M.jpg",
+      "large": "https://covers.openlibrary.org/b/id/12364437-L.jpg"
+    }
+  }
+}

@@ -1,0 +1,142 @@
+import type { BookSource } from '../data/db';
+
+export interface LookupResult {
+  isbn13: string;
+  title: string;
+  authors: string[];
+  pageCount?: number;
+  description?: string;
+  subjects: string[];
+  /** Candidate cover URLs, best first. */
+  coverUrls: string[];
+  source: Exclude<BookSource, 'manual'>;
+}
+
+export interface LookupOptions {
+  fetchImpl?: typeof fetch;
+  timeoutMs?: number;
+}
+
+const DEFAULT_TIMEOUT_MS = 8000;
+
+export const openLibraryUrl = (isbn: string) =>
+  `https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`;
+export const googleBooksUrl = (isbn: string) =>
+  `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`;
+// default=false makes Open Library answer 404 instead of a blank image when there is no cover.
+export const openLibraryCoverUrl = (isbn: string) =>
+  `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg?default=false`;
+
+/** GET + JSON parse with a timeout. Returns null on any failure (network, timeout, bad status, bad JSON). */
+export async function fetchJson(url: string, options: LookupOptions = {}): Promise<unknown> {
+  const { fetchImpl = fetch, timeoutMs = DEFAULT_TIMEOUT_MS } = options;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetchImpl(url, { signal: controller.signal });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// --- tiny helpers for reading untyped JSON safely ---
+
+type Json = Record<string, unknown>;
+
+const isObject = (value: unknown): value is Json =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const str = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.trim() ? value.trim() : undefined;
+
+const positiveInt = (value: unknown): number | undefined =>
+  typeof value === 'number' && Number.isInteger(value) && value > 0 ? value : undefined;
+
+const strings = (value: unknown): string[] =>
+  Array.isArray(value) ? value.map(str).filter((s): s is string => s !== undefined) : [];
+
+const names = (value: unknown): string[] =>
+  Array.isArray(value) ? value.map((item) => (isObject(item) ? str(item.name) : undefined)).filter((s): s is string => s !== undefined) : [];
+
+const withSubtitle = (title: string, subtitle?: string) => (subtitle ? `${title}: ${subtitle}` : title);
+
+// --- Open Library ---
+
+export function parseOpenLibrary(data: unknown, isbn13: string): LookupResult | null {
+  if (!isObject(data)) return null;
+  const book = data[`ISBN:${isbn13}`];
+  if (!isObject(book)) return null;
+  const title = str(book.title);
+  if (!title) return null;
+
+  const cover = isObject(book.cover) ? str(book.cover.large) ?? str(book.cover.medium) : undefined;
+  const excerpt = Array.isArray(book.excerpts) && isObject(book.excerpts[0]) ? str(book.excerpts[0].text) : undefined;
+
+  return {
+    isbn13,
+    title: withSubtitle(title, str(book.subtitle)),
+    authors: names(book.authors),
+    pageCount: positiveInt(book.number_of_pages),
+    description: excerpt,
+    subjects: names(book.subjects),
+    coverUrls: [openLibraryCoverUrl(isbn13), ...(cover ? [cover] : [])],
+    source: 'openlibrary',
+  };
+}
+
+// --- Google Books ---
+
+export function parseGoogleBooks(data: unknown, isbn13: string): LookupResult | null {
+  if (!isObject(data) || !Array.isArray(data.items) || !isObject(data.items[0])) return null;
+  const info = data.items[0].volumeInfo;
+  if (!isObject(info)) return null;
+  const title = str(info.title);
+  if (!title) return null;
+
+  const links = isObject(info.imageLinks) ? info.imageLinks : {};
+  const thumbnail = str(links.thumbnail) ?? str(links.smallThumbnail);
+
+  return {
+    isbn13,
+    title: withSubtitle(title, str(info.subtitle)),
+    authors: strings(info.authors),
+    pageCount: positiveInt(info.pageCount),
+    description: str(info.description),
+    // Google gives categories like "Fiction / Romance / Contemporary".
+    subjects: strings(info.categories),
+    coverUrls: thumbnail ? [thumbnail.replace(/^http:/, 'https:')] : [],
+    source: 'googlebooks',
+  };
+}
+
+/** Fills gaps in the primary result (description, pages, ...) with data from a second source. */
+export function mergeResults(primary: LookupResult, extra: LookupResult | null): LookupResult {
+  if (!extra) return primary;
+  return {
+    ...primary,
+    authors: primary.authors.length ? primary.authors : extra.authors,
+    pageCount: primary.pageCount ?? extra.pageCount,
+    description: primary.description ?? extra.description,
+    subjects: [...new Set([...primary.subjects, ...extra.subjects])],
+    coverUrls: [...new Set([...primary.coverUrls, ...extra.coverUrls])],
+  };
+}
+
+/**
+ * Looks up a book: Open Library first, then Google Books. Never throws; null means "not found".
+ * When Open Library finds the book, Google Books is still asked to fill in the description,
+ * which mood matching relies on.
+ */
+export async function lookup(isbn13: string, options: LookupOptions = {}): Promise<LookupResult | null> {
+  const fromOpenLibrary = parseOpenLibrary(await fetchJson(openLibraryUrl(isbn13), options), isbn13);
+  const fromGoogle = fromOpenLibrary?.description
+    ? null
+    : parseGoogleBooks(await fetchJson(googleBooksUrl(isbn13), options), isbn13);
+
+  if (fromOpenLibrary) return mergeResults(fromOpenLibrary, fromGoogle);
+  return fromGoogle;
+}

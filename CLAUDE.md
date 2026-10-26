@@ -1,6 +1,7 @@
 # CLAUDE.md — ShelfScan 🌸
 
 > Instructions for Claude Code. Read this whole file before writing any code.
+> **Also read `PROGRESS.md`**: it records what is built, the chosen design (direction C "Candy Outline") and decisions that override parts of this spec.
 > Work in the phases listed under "Build order". Finish one phase, run the checks, then tell me what you did and wait for my OK before starting the next.
 
 ## 1. What this app is (one paragraph)
