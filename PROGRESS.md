@@ -196,6 +196,17 @@ Most books are scanned *before* reading, so the reader can't tag the mood. The a
 - The genre dropdown is replaced by a sideways-scrolling row of genre chips with counts ("Romance 3"), most common first. One genre at a time; tapping the selected chip again (or "All genres") shows everything. Sort keeps its dropdown, now full width. `libraryGenres()` returns `{ genre, count }[]`.
 - Genres are now also taken from the **subtitle** (on add and on refresh), so "…New Crime Thriller…" gives Thriller + Crime.
 
+### Safeguards after a lost library on iPhone (Safari)
+Nothing in the code deletes data except Settings → Delete all (double confirm), and the database schema is still version 1. The likely causes are iOS storage rules: Safari's 7-day deletion of website data, and separate storage for Safari vs. the Home Screen app vs. each different URL.
+- `src/lib/safety.ts`: `requestPersistentStorage()` runs once on start (`main.tsx`; no popup on iOS/Chrome); `isStoragePersisted()`, `isInstalledApp()`, `isIos()`; last-backup time and reminder snooze in localStorage (`shelfscan:lastBackupAt`, `shelfscan:backupReminderSnoozedUntil`); `booksSinceBackup`, `shouldRemindBackup` (≥ 3 books added since the last backup, unless snoozed for 3 days).
+- `exportBackupNow()` (exportImport.ts) downloads the JSON backup and records the time; used by Settings and the reminder.
+- **Settings → "Keep your books safe"** (mint card): last backup time, storage protected/not + "Protect my books", and — in Safari on iPhone — a warning about the 7-day rule with how to move to the Home Screen app.
+- **Library → backup banner** (`BackupReminder.tsx`): "N books aren't in a backup yet" with **Back up now** / **Later**.
+- Tests: `tests/safety.test.ts`.
+
+### Search by author
+- The Scan page's backup search is now **Search by title or author** (`BookSearch.tsx`, replaces `TitleSearch.tsx`) with Title / Author chips. Author search uses Open Library `search.json?author=…` (up to 30 results); picking a result works like before (lookup by its first ISBN-13, or the manual form pre-filled with title + author when it has none). `searchBooks(query, by)` in `lookup.ts`; `searchByTitle` remains as a shortcut.
+
 ## Known risks / to verify on a real phone
 
 - **Cover CORS:** covers are fetched with `fetch()` so the Blob can be stored. If a cover host doesn't send CORS headers, the download fails and the book falls back to the title hue and no stored cover. Check in Phase 5 with real scans.

@@ -1,4 +1,5 @@
 import { db, type Book, type InfoSource, type ShelfDb } from '../data/db';
+import { recordBackup } from './safety';
 
 const INFO_SOURCES: InfoSource[] = ['openlibrary', 'googlebooks', 'dnb', 'wikipedia'];
 
@@ -155,4 +156,12 @@ export function downloadFile(contents: string, fileName: string, type: string): 
   link.click();
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+const today = () => new Date().toISOString().slice(0, 10);
+
+/** Downloads a full JSON backup of the library and remembers when it was made. */
+export async function exportBackupNow(database: ShelfDb = db): Promise<void> {
+  downloadFile(await exportJson(await database.books.toArray()), `shelfscan-backup-${today()}.json`, 'application/json');
+  recordBackup();
 }

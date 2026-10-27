@@ -78,3 +78,24 @@
 @media (min-width: 860px) {
   .book-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
+
+.backup-reminder {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: var(--outline);
+  border-radius: var(--radius-m);
+  background: var(--peach);
+  box-shadow: var(--pop-s);
+}
+
+.backup-reminder .hand {
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.backup-reminder-buttons {
+  display: flex;
+  gap: 8px;
+}

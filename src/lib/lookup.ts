@@ -223,8 +223,15 @@ export interface TitleSearchResult {
   coverUrl?: string;
 }
 
-export const titleSearchUrl = (query: string) =>
-  `https://openlibrary.org/search.json?title=${encodeURIComponent(query)}&limit=10&fields=key,title,author_name,isbn,first_publish_year,cover_i`;
+export type SearchBy = 'title' | 'author';
+
+const SEARCH_FIELDS = 'key,title,author_name,isbn,first_publish_year,cover_i';
+
+export const bookSearchUrl = (query: string, by: SearchBy) =>
+  // An author usually has more books than one title has editions, so show more results.
+  `https://openlibrary.org/search.json?${by}=${encodeURIComponent(query)}&limit=${by === 'author' ? 30 : 10}&fields=${SEARCH_FIELDS}`;
+
+export const titleSearchUrl = (query: string) => bookSearchUrl(query, 'title');
 
 const ISBN13 = /^97[89]\d{10}$/;
 
@@ -246,8 +253,12 @@ export function parseTitleSearch(data: unknown): TitleSearchResult[] {
   });
 }
 
-/** Finds books by title. Returns [] on any failure. */
-export async function searchByTitle(query: string, options: LookupOptions = {}): Promise<TitleSearchResult[]> {
+/** Finds books by title or by author on Open Library. Returns [] on any failure. */
+export async function searchBooks(query: string, by: SearchBy, options: LookupOptions = {}): Promise<TitleSearchResult[]> {
   if (!query.trim()) return [];
-  return parseTitleSearch(await fetchJson(titleSearchUrl(query.trim()), options));
+  return parseTitleSearch(await fetchJson(bookSearchUrl(query.trim(), by), options));
+}
+
+export function searchByTitle(query: string, options: LookupOptions = {}): Promise<TitleSearchResult[]> {
+  return searchBooks(query, 'title', options);
 }

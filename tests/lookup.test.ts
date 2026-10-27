@@ -1,4 +1,4 @@
-import { lookup, searchByTitle, type LookupOptions } from '../src/lib/lookup';
+import { lookup, searchBooks, searchByTitle, type LookupOptions } from '../src/lib/lookup';
 import searchFixture from './fixtures/openlibrary-search-book-lovers.json';
 import olEdition from './fixtures/openlibrary-edition-OL32334186M.json';
 import olWork from './fixtures/openlibrary-work-OL24337047W.json';
@@ -153,6 +153,17 @@ describe('searchByTitle', () => {
     });
     expect(results[1].isbn13).toBeUndefined(); // only an ISBN-10
     expect(results[2].authors).toEqual([]);
+  });
+
+  it('searches by author with the author field', async () => {
+    const urls: string[] = [];
+    const fetchImpl: typeof fetch = async (input) => {
+      urls.push(String(input));
+      return new Response(JSON.stringify(searchFixture));
+    };
+    const results = await searchBooks('Emily Henry', 'author', { fetchImpl });
+    expect(urls[0]).toContain('search.json?author=Emily%20Henry&limit=30');
+    expect(results[0].title).toBe('Book Lovers');
   });
 
   it('returns [] for empty queries and failures', async () => {

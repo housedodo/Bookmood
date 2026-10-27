@@ -7,7 +7,7 @@ import IsbnLookup from '../components/IsbnLookup';
 import ManualAddForm from '../components/ManualAddForm';
 import Scanner from '../components/Scanner';
 import Sheet from '../components/Sheet';
-import TitleSearch from '../components/TitleSearch';
+import BookSearch from '../components/BookSearch';
 import Toast, { type ToastData } from '../components/Toast';
 import { db, deleteBook, updateBook, type Book } from '../data/db';
 import { addByIsbn, type AddByIsbnResult } from '../lib/addBook';
@@ -189,9 +189,9 @@ export default function ScanPage() {
         </p>
         <IsbnLookup onAdded={onAdded} onDuplicate={onDuplicate} onNotFound={(isbn) => setManual({ isbn, offline: !navigator.onLine })} />
         {showTitleSearch ? (
-          <TitleSearch onPick={onPickTitle} />
+          <BookSearch onPick={onPickTitle} />
         ) : (
-          <button type="button" className="btn btn-secondary" onClick={() => setShowTitleSearch(true)}>Search by title</button>
+          <button type="button" className="btn btn-secondary" onClick={() => setShowTitleSearch(true)}>Search by title or author</button>
         )}
       </section>
 

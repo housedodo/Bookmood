@@ -1,13 +1,15 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useCallback, useRef, useState, type ChangeEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
 import Toast, { type ToastData } from '../components/Toast';
 import { db } from '../data/db';
-import { downloadFile, exportCsv, exportJson, importJson } from '../lib/exportImport';
+import { downloadFile, exportBackupNow, exportCsv, importJson } from '../lib/exportImport';
 import { refreshAll } from '../lib/refresh';
+import { getLastBackupAt, isInstalledApp, isIos, isStoragePersisted, requestPersistentStorage } from '../lib/safety';
 import '../styles/settings.css';
 
 const builtAt = new Date(__BUILD_TIME__).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 const today = () => new Date().toISOString().slice(0, 10);
+const formatDate = (time: number) => new Date(time).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
 type DeleteStep = 'idle' | 'first' | 'second';
 
@@ -19,11 +21,25 @@ export default function SettingsPage() {
   const [progress, setProgress] = useState<{ done: number; total: number }>();
   const [toast, setToast] = useState<ToastData>();
   const clearToast = useCallback(() => setToast(undefined), []);
+  const [lastBackupAt, setLastBackupAt] = useState(getLastBackupAt);
+  const [persisted, setPersisted] = useState<boolean>();
+  const inSafariOnIphone = isIos() && !isInstalledApp();
+
+  useEffect(() => {
+    void isStoragePersisted().then(setPersisted);
+  }, []);
 
   const exportBackup = async () => {
     setBusy(true);
-    downloadFile(await exportJson(await db.books.toArray()), `shelfscan-backup-${today()}.json`, 'application/json');
+    await exportBackupNow();
+    setLastBackupAt(getLastBackupAt());
     setBusy(false);
+  };
+
+  const protect = async () => {
+    const granted = await requestPersistentStorage();
+    setPersisted(granted);
+    if (!granted) setToast({ message: 'The browser said no for now — keep making backups ♡' });
   };
 
   const exportSpreadsheet = async () => {
@@ -66,6 +82,27 @@ export default function SettingsPage() {
         <h1 className="page-title">Settings</h1>
         <p className="page-subtitle">backups &amp; little things</p>
       </header>
+
+      <section className="settings-card settings-safety">
+        <h2>Keep your books safe</h2>
+        <p>
+          Your books live only on this phone. <strong>Last backup:</strong> {lastBackupAt ? formatDate(lastBackupAt) : 'never'}
+        </p>
+        <p>
+          <strong>Storage:</strong>{' '}
+          {persisted === undefined ? '…' : persisted ? "protected — the browser won't clear it to free up space ✓" : 'not protected yet'}
+        </p>
+        {persisted === false && (
+          <button type="button" className="btn btn-small btn-secondary" onClick={protect}>Protect my books</button>
+        )}
+        {inSafariOnIphone && (
+          <p className="settings-warning">
+            You're using ShelfScan in Safari. <strong>Safari deletes a website's data if you don't open it for 7 days.</strong>{' '}
+            Add it to your Home Screen (Share → Add to Home Screen) and use it from there. To take your books along: Export
+            backup here, then Import backup in the Home Screen app.
+          </p>
+        )}
+      </section>
 
       <section className="settings-card">
         <h2>Backup</h2>

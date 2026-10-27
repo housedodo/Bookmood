@@ -8,6 +8,10 @@ import '@fontsource/quicksand/700.css';
 import '@fontsource/caveat/600.css';
 import './styles/theme.css';
 import App from './App';
+import { requestPersistentStorage } from './lib/safety';
+
+// Ask the browser not to clear the library to free up space (no popup on iPhone or Chrome).
+void requestPersistentStorage();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

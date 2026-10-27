@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useCallback, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import BackupReminder from '../components/BackupReminder';
 import BookCard from '../components/BookCard';
 import BookDetail from '../components/BookDetail';
 import FilterBar from '../components/FilterBar';
@@ -67,6 +68,8 @@ export default function LibraryPage() {
           <Icon name="plus" className="btn-icon" /> Add
         </button>
       </header>
+
+      <BackupReminder books={books} />
 
       {books.length === 0 ? (
         <div className="placeholder">
