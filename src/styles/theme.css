@@ -280,3 +280,24 @@ button {
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* Long texts (summaries) show 3 lines until expanded; see ClampText. */
+.clamp {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.clamp-toggle {
+  min-height: 32px;
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+}

@@ -4,6 +4,7 @@ import { bookThemeStyle } from '../lib/bookTheme';
 import { moodUnknown } from '../lib/moodInfo';
 import { refreshBook, type RefreshOutcome } from '../lib/refresh';
 import BookCover from './BookCover';
+import ClampText from './ClampText';
 import BookEditForm from './BookEditForm';
 import BlurbPhoto from './BlurbPhoto';
 import MoodChips from './MoodChips';
@@ -114,11 +115,11 @@ export default function BookDetail({ book, onClose }: { book: Book; onClose: () 
         </div>
       )}
 
-      {book.description && <p className="detail-description">{book.description}</p>}
+      {book.description && <ClampText text={book.description} className="detail-description" />}
       {book.blurb && (
         <div className="detail-blurb">
           <span className="detail-blurb-label">From the back cover</span>
-          <p>{book.blurb}</p>
+          <ClampText text={book.blurb} />
         </div>
       )}
 
