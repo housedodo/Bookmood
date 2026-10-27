@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import BackupReminder from '../components/BackupReminder';
 import BookCard from '../components/BookCard';
+import Bookcase from '../components/Bookcase';
 import BookDetail from '../components/BookDetail';
 import FilterBar from '../components/FilterBar';
 import HeartConfetti from '../components/HeartConfetti';
@@ -15,7 +16,10 @@ import Toast, { type ToastData } from '../components/Toast';
 import { db, type Book } from '../data/db';
 import { moodUnknown } from '../lib/moodInfo';
 import { activeFilters, clearFilter, DEFAULT_FILTERS, filterBooks, libraryGenres, sortBooks, type SortKey } from '../lib/library';
+import { readPref, writePref } from '../lib/prefs';
 import '../styles/library.css';
+
+type LibraryView = 'shelves' | 'bookcase';
 
 export default function LibraryPage() {
   const books = useLiveQuery(() => db.books.toArray(), []);
@@ -24,6 +28,11 @@ export default function LibraryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState(() => ({ ...DEFAULT_FILTERS, needsMoodInfo: searchParams.get('unknown') === '1' }));
   const [sort, setSort] = useState<SortKey>('recent');
+  const [view, setView] = useState<LibraryView>(() => readPref('libraryView', ['shelves', 'bookcase'], 'shelves'));
+  const chooseView = (next: LibraryView) => {
+    setView(next);
+    writePref('libraryView', next);
+  };
   const openId = searchParams.get('book') ?? undefined;
   const setOpenId = useCallback((id?: string) => setSearchParams(id ? { book: id } : {}), [setSearchParams]);
   const [filtering, setFiltering] = useState(false);
@@ -123,8 +132,19 @@ export default function LibraryPage() {
 
           <BackupReminder books={books} />
 
+          {!showResults && (
+            <div className="view-switch" role="group" aria-label="Show my books as">
+              <button type="button" aria-pressed={view === 'shelves'} onClick={() => chooseView('shelves')}>Shelves</button>
+              <button type="button" aria-pressed={view === 'bookcase'} onClick={() => chooseView('bookcase')}>Bookcase</button>
+            </div>
+          )}
+
           {!showResults ? (
-            <Shelves books={books} onOpen={(b) => setOpenId(b.id)} onSeeAll={(status) => setFilters({ ...filters, status })} />
+            view === 'bookcase' ? (
+              <Bookcase books={books} onOpen={(b) => setOpenId(b.id)} />
+            ) : (
+              <Shelves books={books} onOpen={(b) => setOpenId(b.id)} onSeeAll={(status) => setFilters({ ...filters, status })} />
+            )
           ) : shown.length === 0 ? (
             <div className="placeholder">
               <p className="placeholder-text">No books match.</p>

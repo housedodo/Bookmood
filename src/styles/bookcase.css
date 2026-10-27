@@ -1,0 +1,133 @@
+.bookcase-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bookcase-order {
+  display: flex;
+  gap: 8px;
+}
+
+.bookcase-order .chip {
+  min-height: 32px;
+  font-size: 0.8rem;
+}
+
+/* The cabinet: plum outline, warm wall color behind the books. */
+.bookcase {
+  padding: 16px 12px 0;
+  border: var(--outline);
+  border-radius: var(--radius-m) var(--radius-m) 8px 8px;
+  background: #fbe3d6;
+  box-shadow: 4px 4px 0 var(--text);
+}
+
+/*
+ * Books wrap into rows of 150 px; the 16 px gap between rows is drawn as a wooden plank
+ * by a repeating gradient (period 166 px = row + plank). padding-bottom adds the last plank.
+ */
+.bookcase-books {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px 3px;
+  padding: 0 4px 16px;
+  margin: 0 -12px;
+  padding-inline: 16px;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 150px,
+    var(--text) 150px 152px,
+    #e8b48a 152px 163px,
+    #d29a6d 163px 166px
+  );
+}
+
+.spine-slot {
+  height: 150px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.spine {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+  border: var(--outline);
+  border-bottom-width: 0;
+  border-radius: 5px 5px 2px 2px;
+  background:
+    linear-gradient(to bottom, transparent 9px, rgba(75, 44, 60, 0.3) 9px 11px, transparent 11px calc(100% - 13px), rgba(75, 44, 60, 0.3) calc(100% - 13px) calc(100% - 11px), transparent 0),
+    hsl(var(--hue) 70% 80%);
+  color: var(--text);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.spine:hover,
+.spine:focus-visible {
+  transform: translateY(-6px);
+}
+
+.spine:focus-visible {
+  outline: 3px solid var(--pink-500);
+  outline-offset: 2px;
+}
+
+.spine-title {
+  max-height: 100%;
+  overflow: hidden;
+  writing-mode: vertical-rl;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.68rem;
+  line-height: 1;
+}
+
+/* Reading now: a pink ribbon bookmark hanging out of the top. */
+.spine-reading::after,
+.legend-ribbon {
+  content: '';
+  width: 7px;
+  height: 18px;
+  background: var(--pink-500);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 75%, 0 100%);
+}
+
+.spine-reading::after {
+  position: absolute;
+  top: -8px;
+  right: 3px;
+}
+
+/* Read: a tiny heart at the foot of the spine. */
+.spine-read::after {
+  content: '♥';
+  position: absolute;
+  bottom: 1px;
+  font-size: 0.6rem;
+  color: var(--pink-500);
+}
+
+.bookcase-legend {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-soft);
+}
+
+.legend-ribbon {
+  display: inline-block;
+  height: 12px;
+}
+
+.bookcase-legend span[aria-hidden='true']:not(.legend-ribbon) {
+  color: var(--pink-500);
+}

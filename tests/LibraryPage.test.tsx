@@ -97,4 +97,16 @@ describe('LibraryPage', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: 'Yes, delete' }));
     await vi.waitFor(async () => expect(await db.books.count()).toBe(0));
   });
+
+  it('shows every book as a spine in the bookcase view', async () => {
+    localStorage.clear();
+    await addBook({ isbn13: '1', title: 'Spine One', authors: ['A. Writer'], status: 'reading', source: 'manual' });
+    await addBook({ isbn13: '2', title: 'Spine Two', source: 'manual' });
+    renderPage();
+    await userEvent.click(await screen.findByRole('button', { name: 'Bookcase' }));
+    const bookcase = screen.getByRole('region', { name: 'Bookcase' });
+    expect(within(bookcase).getByRole('button', { name: 'Spine One by A. Writer, reading now' })).toBeInTheDocument();
+    await userEvent.click(within(bookcase).getByRole('button', { name: /Spine Two/ }));
+    expect(await screen.findByRole('dialog', { name: 'Spine Two' })).toBeInTheDocument();
+  });
 });

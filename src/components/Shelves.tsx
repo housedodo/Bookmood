@@ -3,8 +3,6 @@ import { bookThemeStyle } from '../lib/bookTheme';
 import BookCover from './BookCover';
 import '../styles/shelves.css';
 
-const STRIP_MAX = 12;
-
 interface ShelvesProps {
   books: Book[];
   onOpen: (book: Book) => void;
@@ -60,8 +58,9 @@ function Strip({ title, books, onOpen, onSeeAll, small = false }: StripProps) {
         </h2>
         <button type="button" className="link-button" onClick={onSeeAll}>See all</button>
       </div>
+      {/* A grid that wraps to the screen width, so every book is visible without sideways scrolling. */}
       <div className={`strip ${small ? 'strip-small' : ''}`}>
-        {books.slice(0, STRIP_MAX).map((book) => (
+        {books.map((book) => (
           <button key={book.id} type="button" className="strip-book book-theme" style={bookThemeStyle(book.themeHue)} onClick={() => onOpen(book)}>
             <BookCover book={book} />
             {!small && <span className="strip-title">{book.title}</span>}

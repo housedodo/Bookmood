@@ -158,3 +158,32 @@
   .book-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
+
+/* Shelves | Bookcase switch: a small two-part pill. */
+.view-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: var(--outline);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.view-switch button {
+  min-height: 38px;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.view-switch button + button {
+  border-left: var(--outline);
+}
+
+.view-switch button[aria-pressed='true'] {
+  background: var(--pink-300);
+}

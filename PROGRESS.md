@@ -218,6 +218,11 @@ Goal: a calm phone screen with no clutter or extra buttons.
 - **Scan**: the permanent sticker tip is gone; it only appears when the camera actually sees a non-book barcode.
 - Tests updated (filters via the sheet, Settings via the gear) and added: shelves + See all, ⋯ menu delete, filter pill removal, `ClampText`.
 
+### Shelves fit the screen + Bookcase view
+- **Up next / Finished** are now grids that wrap to the screen width (4 covers per row for Up next, 6 small ones for Finished; 6/9 on wider screens) and show **all** books — no sideways scrolling.
+- **Bookcase** (`Bookcase.tsx`, `src/lib/bookcase.ts`, `bookcase.css`): a **Shelves | Bookcase** switch on the Shelf page (remembered per device via `src/lib/prefs.ts`). The bookcase shows every book as a spine in its pastel color on wooden shelves: spine width from the page count (`spineWidth`), slightly varying height per title (`spineHeight`, 112–144 px in 150 px rows), title written along the spine, a pink ribbon for "reading now" and a small ♥ for "read". Arrange by **Newest / Color / Author** (remembered). Tap a spine to open the book. The shelf planks are one repeating CSS gradient whose period (166 px) equals a row (150 px) + plank (16 px).
+- Tests: `tests/bookcase.test.ts`, bookcase case in `tests/LibraryPage.test.tsx`.
+
 ## Known risks / to verify on a real phone
 
 - **Cover CORS:** covers are fetched with `fetch()` so the Blob can be stored. If a cover host doesn't send CORS headers, the download fails and the book falls back to the title hue and no stored cover. Check in Phase 5 with real scans.

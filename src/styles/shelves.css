@@ -67,45 +67,36 @@
   color: var(--text-soft);
 }
 
-/* Sideways-scrolling row of covers. */
+/* Covers in a grid that fits the screen: 4 per row for Up next, 6 small ones for Finished. */
 .strip {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  margin: 0 -16px;
-  padding: 2px 16px 8px;
-  scroll-snap-type: x proximity;
-  scroll-padding-inline: 16px;
-  scrollbar-width: none;
-}
-
-.strip::-webkit-scrollbar {
-  display: none;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px 10px;
 }
 
 .strip-book {
-  flex: 0 0 96px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
   padding: 0;
   border: none;
   background: none;
   color: var(--text);
   font: inherit;
   text-align: left;
-  scroll-snap-align: start;
   cursor: pointer;
 }
 
 .strip-book .cover {
-  box-shadow: 3px 3px 0 var(--text);
-  font-size: 0.7rem;
-  padding: 6px;
+  box-shadow: 2px 2px 0 var(--text);
+  font-size: 0.6rem;
+  padding: 5px;
 }
 
-.strip-small .strip-book {
-  flex-basis: 58px;
+.strip-small {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px 8px;
 }
 
 .strip-small .cover {
@@ -114,11 +105,17 @@
   box-shadow: none;
 }
 
+@media (min-width: 600px) {
+  .strip { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .strip-small { grid-template-columns: repeat(9, minmax(0, 1fr)); }
+}
+
 .strip-title {
   font-family: var(--font-heading);
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   line-height: 1.15;
+  overflow-wrap: anywhere;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
