@@ -228,10 +228,16 @@ Goal: a calm phone screen with no clutter or extra buttons.
 - The Shelf page no longer has a **+** button or an "Add a book" sheet, and the empty shelf only offers **Scan a book**. Books come in through Scan: camera, **Type ISBN**, or **Search by title or author**. The hand-entry form (`ManualAddForm`) still opens on the Scan page when a book can't be found online (or a search result has no ISBN).
 - Tests: the Library "add by hand" test became "has no add button"; `tests/ManualAddForm.test.tsx` covers the form directly.
 
+### Books whose barcode isn't in any database (international editions)
+Real-world case: "FOR INTERNATIONAL SALE" / "International Edition" copies (e.g. 979-8-217-30075-4, 978-1-6682-1677-4, 979-8-217-20871-5) have their own ISBNs that Open Library and Google Books usually don't know; the DNB only covers German books.
+- When a scanned or typed ISBN isn't found, the Scan page sheet is now **"Not found online"**: it explains this and offers **title / author search** first, then the hand-entry form ("or fill it in yourself").
+- Picking a search result runs `addWithInfoFrom(scannedIsbn, picked)` (`addBook.ts`): looks up the picked edition's ISBN, saves its info (title, authors, pages, description, subjects, genres, tags, cover — plus the search's own cover id as an extra candidate) but under the **scanned ISBN**, so rescanning the same copy says "Already in your library". The edition used is stored in the new optional `Book.infoIsbn`; **Refresh book info** looks that one up (`refresh.ts`). If the picked work has no ISBN-13 or its lookup fails, the hand form opens pre-filled with title + author + scanned ISBN.
+- Tests: `tests/addBook.test.ts`. Browser check done with the first ISBN above (search answers simulated).
+
 ## Known risks / to verify on a real phone
 
 - **Cover CORS:** covers are fetched with `fetch()` so the Blob can be stored. If a cover host doesn't send CORS headers, the download fails and the book falls back to the title hue and no stored cover. Check in Phase 5 with real scans.
-- **Google Books without an API key** has a shared anonymous quota and sometimes answers 429. That is handled (treated as "not found"), but lookups may then rely on Open Library alone.
+- **Google Books without an API key** has a shared anonymous quota and sometimes answers 429 (this sandbox always gets 429 with a quota of 0). If many lookups on the phone fail, this may be why; a free Google API key (stored in the Worker, not the app) would fix it but goes against the "no API keys" rule — the user's call. That is handled (treated as "not found"), but lookups may then rely on Open Library alone.
 - **Back-cover photo on a real phone**: speed (expect ~5–15 s on a phone; the first time also downloads ~16 MB) and accuracy with glossy covers, curved spines and small print. Tip: good light, phone held flat over the back cover, blurb filling most of the photo.
 - **DNB through the Worker** is only testable on the deployed site (this sandbox can't reach the DNB). If a German book shows "From Open Library" only, check `https://<your-app>/api/dnb?isbn=<isbn>` in the browser — it should show XML.
 - **Camera on iPhone**: only tested in desktop Chromium with a fake camera. Needs a real test in iOS Safari (HTTPS link, allow camera, scan a few books). Focus on small barcodes can be slow on some phones — hold the book 15–25 cm away.

@@ -10,7 +10,7 @@ import Sheet from '../components/Sheet';
 import BookSearch from '../components/BookSearch';
 import Toast, { type ToastData } from '../components/Toast';
 import { db, deleteBook, updateBook, type Book } from '../data/db';
-import { addByIsbn, type AddByIsbnResult } from '../lib/addBook';
+import { addByIsbn, addWithInfoFrom, type AddByIsbnResult } from '../lib/addBook';
 import { createScanGate } from '../lib/barcode';
 import { bookThemeStyle } from '../lib/bookTheme';
 import type { TitleSearchResult } from '../lib/lookup';
@@ -104,6 +104,21 @@ export default function ScanPage() {
     if (!busyRef.current) setStickerHint(true);
   }, []);
 
+  // A scanned ISBN that no database knows: let the reader find the book by title/author instead.
+  const canSearchForScanned = Boolean(manual?.isbn && !manual.offline && !manual.title);
+  const [picking, setPicking] = useState(false);
+
+  const pickForScanned = async (picked: TitleSearchResult) => {
+    if (!manual?.isbn) return;
+    setPicking(true);
+    const result = await addWithInfoFrom(manual.isbn, picked);
+    setPicking(false);
+    if (result.kind === 'needsManual') setManual({ isbn: manual.isbn, title: result.title, authors: result.authors });
+    else if (result.kind === 'added') onAdded(result.book);
+    else if (result.kind === 'duplicate') onDuplicate(result.book);
+    else setManual({ isbn: manual.isbn, title: picked.title, authors: picked.authors });
+  };
+
   const onPickTitle = (result: TitleSearchResult) => {
     setShowTitleSearch(false);
     if (result.isbn13) void lookUp(result.isbn13);
@@ -192,15 +207,33 @@ export default function ScanPage() {
       </section>
 
       {manual && (
-        <Sheet title="Add it by hand" onClose={() => setManual(undefined)}>
-          <p className="hand scan-manual-hint">
-            {manual.offline
-              ? "You're offline — I'll need internet to find that book. You can add it manually!"
-              : manual.isbn
-                ? "I couldn't find this book online. Fill in what you know ♡"
-                : 'No ISBN for this one — fill in what you know ♡'}
-          </p>
-          <ManualAddForm initialIsbn={manual.isbn} initialTitle={manual.title} initialAuthors={manual.authors} onAdded={onAdded} onDuplicate={onDuplicate} />
+        <Sheet title={canSearchForScanned ? 'Not found online' : 'Add it by hand'} onClose={() => setManual(undefined)}>
+          {canSearchForScanned ? (
+            <>
+              <p className="scan-manual-hint">
+                This ISBN isn't in the free book databases — that's common for <strong>international editions</strong>. Find the
+                book by its title or author and I'll use that edition's info, but keep your scanned ISBN.
+              </p>
+              {picking ? <p className="hand" role="status">Getting the book's info…</p> : <BookSearch onPick={pickForScanned} />}
+              <p className="form-divider hand">or fill it in yourself</p>
+            </>
+          ) : (
+            <p className="hand scan-manual-hint">
+              {manual.offline
+                ? "You're offline — I'll need internet to find that book. You can add it manually!"
+                : manual.isbn
+                  ? 'Fill in what you know ♡'
+                  : 'No ISBN for this one — fill in what you know ♡'}
+            </p>
+          )}
+          <ManualAddForm
+            key={`${manual.isbn ?? ''}|${manual.title ?? ''}`}
+            initialIsbn={manual.isbn}
+            initialTitle={manual.title}
+            initialAuthors={manual.authors}
+            onAdded={onAdded}
+            onDuplicate={onDuplicate}
+          />
         </Sheet>
       )}
 

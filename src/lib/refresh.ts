@@ -17,7 +17,7 @@ const sameList = (a: string[], b: string[]) => a.length === b.length && a.every(
  */
 export async function refreshBook(book: Book, options: LookupOptions = {}, database: ShelfDb = db): Promise<RefreshOutcome> {
   const hasIsbn = !book.isbn13.startsWith('manual:');
-  const result = hasIsbn ? await lookup(book.isbn13, options) : null;
+  const result = hasIsbn ? await lookup(book.infoIsbn ?? book.isbn13, options) : null;
   if (hasIsbn && !result && !navigator.onLine) return 'offline';
 
   const subjects = union(book.subjects, result?.subjects ?? []);

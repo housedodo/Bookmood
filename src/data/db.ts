@@ -8,6 +8,7 @@ export type InfoSource = 'openlibrary' | 'googlebooks' | 'dnb' | 'wikipedia';
 export interface Book {
   id: string;                 // crypto.randomUUID()
   isbn13: string;             // unique index
+  infoIsbn?: string;          // ISBN of the edition the info came from, when the scanned one isn't in any database (international editions)
   title: string;
   subtitle?: string;          // not shown (often marketing text); used for mood matching
   authors: string[];
