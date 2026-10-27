@@ -61,13 +61,10 @@ describe('LibraryPage', () => {
     expect(screen.getByRole('button', { name: /Hockey Hearts/ })).toBeInTheDocument();
   });
 
-  it('adds a book by hand', async () => {
+  it('has no add button: books come in through the Scan tab', async () => {
     renderPage();
-    await userEvent.click(await screen.findByRole('button', { name: 'Add by hand' }));
-    await userEvent.type(screen.getByLabelText(/Title/), 'My Hand Book');
-    await userEvent.click(screen.getByRole('button', { name: 'Add to my shelf' }));
-    expect(await screen.findByRole('button', { name: /My Hand Book/ })).toBeInTheDocument();
-    expect((await db.books.toArray())[0]).toMatchObject({ title: 'My Hand Book', source: 'manual', status: 'unread' });
+    expect(await screen.findByRole('link', { name: 'Scan a book' })).toHaveAttribute('href', '/scan');
+    expect(screen.queryByRole('button', { name: /Add/ })).not.toBeInTheDocument();
   });
 
   it('shows shelves by default: Reading now, Up next and Finished', async () => {

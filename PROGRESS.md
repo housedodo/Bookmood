@@ -121,6 +121,7 @@ To switch direction later, the knobs are the CSS variables in `src/styles/theme.
 - Fixtures: `tests/fixtures/openlibrary-9780593334836.json`, `googlebooks-9780593334836.json`, `openlibrary-empty.json`, `googlebooks-empty.json`.
 
 ### Phase 4 — Library UI
+- *(Phase 4 history; the Library has since been redesigned — see "Clean redesign" and "One way to add books" below.)*
 - `src/pages/LibraryPage.tsx`: live list via `useLiveQuery` (dexie-react-hooks) so changes show instantly. Header with count ("N books, M waiting to be read") and an **Add** button; search box; `FilterBar`; grid; empty state ("Your shelf is empty. Scan your first book! 📚" + Scan / Add by hand); "No books match" state with Clear filters. Filters/sort are not persisted (reset on reload).
 - `src/lib/library.ts` (pure, tested): `filterBooks`, `sortBooks`, `lengthOf`, `libraryGenres`, `SORT_OPTIONS`, `DEFAULT_FILTERS`.
 - `src/lib/addBook.ts`: `addByIsbn(isbn13)` = duplicate check → `lookup` → `getCoverTheme` → `normalizeGenres` → save; returns `added | duplicate | notFound | offline`, never throws. `addManualBook(input)` for the form.
@@ -222,6 +223,10 @@ Goal: a calm phone screen with no clutter or extra buttons.
 - **Up next / Finished** are now grids that wrap to the screen width (4 covers per row for Up next, 6 small ones for Finished; 6/9 on wider screens) and show **all** books — no sideways scrolling.
 - **Bookcase** (`Bookcase.tsx`, `src/lib/bookcase.ts`, `bookcase.css`): a **Shelves | Bookcase** switch on the Shelf page (remembered per device via `src/lib/prefs.ts`). The bookcase shows every book as a spine in its pastel color on wooden shelves: spine width from the page count (`spineWidth`), slightly varying height per title (`spineHeight`, 112–144 px in 150 px rows), title written along the spine, a pink ribbon for "reading now" and a small ♥ for "read". Arrange by **Newest / Color / Author** (remembered). Tap a spine to open the book. The shelf planks are one repeating CSS gradient whose period (166 px) equals a row (150 px) + plank (16 px).
 - Tests: `tests/bookcase.test.ts`, bookcase case in `tests/LibraryPage.test.tsx`.
+
+### One way to add books: the Scan tab
+- The Shelf page no longer has a **+** button or an "Add a book" sheet, and the empty shelf only offers **Scan a book**. Books come in through Scan: camera, **Type ISBN**, or **Search by title or author**. The hand-entry form (`ManualAddForm`) still opens on the Scan page when a book can't be found online (or a search result has no ISBN).
+- Tests: the Library "add by hand" test became "has no add button"; `tests/ManualAddForm.test.tsx` covers the form directly.
 
 ## Known risks / to verify on a real phone
 

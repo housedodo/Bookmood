@@ -6,14 +6,10 @@ import BookCard from '../components/BookCard';
 import Bookcase from '../components/Bookcase';
 import BookDetail from '../components/BookDetail';
 import FilterBar from '../components/FilterBar';
-import HeartConfetti from '../components/HeartConfetti';
 import Icon from '../components/Icon';
-import IsbnLookup from '../components/IsbnLookup';
-import ManualAddForm from '../components/ManualAddForm';
 import Sheet from '../components/Sheet';
 import Shelves from '../components/Shelves';
-import Toast, { type ToastData } from '../components/Toast';
-import { db, type Book } from '../data/db';
+import { db } from '../data/db';
 import { moodUnknown } from '../lib/moodInfo';
 import { activeFilters, clearFilter, DEFAULT_FILTERS, filterBooks, libraryGenres, sortBooks, type SortKey } from '../lib/library';
 import { readPref, writePref } from '../lib/prefs';
@@ -36,17 +32,8 @@ export default function LibraryPage() {
   const openId = searchParams.get('book') ?? undefined;
   const setOpenId = useCallback((id?: string) => setSearchParams(id ? { book: id } : {}), [setSearchParams]);
   const [filtering, setFiltering] = useState(false);
-  const [adding, setAdding] = useState(false);
-  const [prefillIsbn, setPrefillIsbn] = useState('');
-  const [toast, setToast] = useState<ToastData>();
-  const [confettiKey, setConfettiKey] = useState(0);
-  const clearToast = useCallback(() => setToast(undefined), []);
   const closeDetail = useCallback(() => setOpenId(undefined), [setOpenId]);
   const closeFilters = useCallback(() => setFiltering(false), []);
-  const closeAdd = useCallback(() => {
-    setAdding(false);
-    setPrefillIsbn('');
-  }, []);
 
   const shown = useMemo(() => sortBooks(filterBooks(books ?? [], filters), sort), [books, filters, sort]);
   const genres = useMemo(() => libraryGenres(books ?? []), [books]);
@@ -56,16 +43,6 @@ export default function LibraryPage() {
   const showResults = active.length > 0 || filters.query.trim() !== '';
   const openBook = books?.find((book) => book.id === openId);
   const unread = books?.filter((book) => book.status === 'unread').length ?? 0;
-
-  const onAdded = (book: Book) => {
-    closeAdd();
-    setConfettiKey((n) => n + 1);
-    setToast({ message: `Added “${book.title}” ♡` });
-  };
-  const onDuplicate = (book: Book) => {
-    closeAdd();
-    setToast({ message: 'Already in your library ♡', action: { label: 'Open', onClick: () => setOpenId(book.id) } });
-  };
 
   if (!books) return <main className="page" aria-busy="true" />;
 
@@ -79,9 +56,6 @@ export default function LibraryPage() {
           </p>
         </div>
         <div className="library-header-actions">
-          <button type="button" className="icon-button" onClick={() => setAdding(true)} aria-label="Add a book">
-            <Icon name="plus" />
-          </button>
           <Link to="/settings" className="icon-button" aria-label="Settings">
             <Icon name="settings" />
           </Link>
@@ -91,10 +65,7 @@ export default function LibraryPage() {
       {books.length === 0 ? (
         <div className="placeholder">
           <p className="placeholder-text">Your shelf is empty. Scan your first book! 📚</p>
-          <div className="placeholder-actions">
-            <Link to="/scan" className="btn">Scan a book</Link>
-            <button type="button" className="btn btn-secondary" onClick={() => setAdding(true)}>Add by hand</button>
-          </div>
+          <Link to="/scan" className="btn">Scan a book</Link>
         </div>
       ) : (
         <>
@@ -178,16 +149,6 @@ export default function LibraryPage() {
 
       {openBook && <BookDetail key={openBook.id} book={openBook} onClose={closeDetail} />}
 
-      {adding && (
-        <Sheet title="Add a book" onClose={closeAdd}>
-          <IsbnLookup onAdded={onAdded} onDuplicate={onDuplicate} onNotFound={setPrefillIsbn} />
-          <p className="form-divider hand">or fill it in yourself</p>
-          <ManualAddForm key={prefillIsbn} initialIsbn={prefillIsbn} onAdded={onAdded} onDuplicate={onDuplicate} />
-        </Sheet>
-      )}
-
-      {confettiKey > 0 && <HeartConfetti key={confettiKey} />}
-      {toast && <Toast toast={toast} onDone={clearToast} />}
     </main>
   );
 }
