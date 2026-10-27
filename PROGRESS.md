@@ -207,6 +207,17 @@ Nothing in the code deletes data except Settings → Delete all (double confirm)
 ### Search by author
 - The Scan page's backup search is now **Search by title or author** (`BookSearch.tsx`, replaces `TitleSearch.tsx`) with Title / Author chips. Author search uses Open Library `search.json?author=…` (up to 30 results); picking a result works like before (lookup by its first ISBN-13, or the manual form pre-filled with title + author when it has none). `searchBooks(query, by)` in `lookup.ts`; `searchByTitle` remains as a shortcut.
 
+### Clean redesign: one filter button + shelves (chosen from https://claude.ai/artifact/TbRze4kiHAh1XET3PDfwPt)
+Goal: a calm phone screen with no clutter or extra buttons.
+- **3 tabs**: Shelf · Scan · Pick (`TabBar.tsx`). Settings opens from the gear on the Shelf page and has a back button.
+- **Library** (`LibraryPage.tsx`): header with **+** (add) and gear; a search field with **one filter button** (badge = number of active filters). With no search/filter the page shows **shelves** (`Shelves.tsx`): *Reading now* (cards), *Up next* (unread, swipeable covers) and *Finished* (small covers), each with **See all** (= filter by that status). Any search or filter switches to the grid of results; active filters show as removable pills ("Unread ×"). `activeFilters()` / `clearFilter()` in `library.ts`.
+- **Filter & sort sheet** (`FilterBar.tsx`, now sheet content): Reading status, Genre (with counts), Length, Needs attention (Mood unknown), Sort by; **Show N books** + **Clear all**.
+- **Backup reminder** is one quiet line ("7 books not backed up yet · Back up ×").
+- **Book sheet** (`BookDetail.tsx`): Close left, **⋯ menu** right (`BookMenu.tsx`: Edit details, Read the back cover, Refresh book info, Book info & sources, Delete book). On screen only: cover, title, author · pages, hearts, status switch, **Feels** pills (your moods, else the best-matching detected moods via `bookMoods()`; "change" opens the mood chips), 3-line summary with **more** (`ClampText.tsx`), tag pills with "+ tag", and "+ add a little note…" (opens the notes box). Unknown mood shows one line: "Can't tell the mood yet · Read the back cover · set it". Delete asks inline. `Sheet` takes `actions` for this header layout; `BlurbPhoto` takes `openRef` so the menu can open the camera directly (iOS needs the file picker opened inside the tap).
+- **Pick**: the unknown-mood box became one line linking to the Library filtered to those books (`/#/?unknown=1`).
+- **Scan**: the permanent sticker tip is gone; it only appears when the camera actually sees a non-book barcode.
+- Tests updated (filters via the sheet, Settings via the gear) and added: shelves + See all, ⋯ menu delete, filter pill removal, `ClampText`.
+
 ## Known risks / to verify on a real phone
 
 - **Cover CORS:** covers are fetched with `fetch()` so the Blob can be stored. If a cover host doesn't send CORS headers, the download fails and the book falls back to the title hue and no stored cover. Check in Phase 5 with real scans.

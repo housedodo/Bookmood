@@ -28,3 +28,7 @@
   font-size: 0.95rem;
   line-height: 1.45;
 }
+
+.blurb-photo.is-hidden {
+  display: contents;
+}

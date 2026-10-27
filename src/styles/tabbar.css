@@ -8,8 +8,7 @@
   max-width: 560px;
   margin: 0 auto;
   display: grid;
-  /* Library, Pick | raised Scan | Settings (spans two columns to keep Scan centered) */
-  grid-template-columns: 1fr 1fr 76px 1fr 1fr;
+  grid-template-columns: 1fr 76px 1fr;
   align-items: center;
   height: var(--tabbar-height);
   background: var(--surface);
@@ -46,10 +45,6 @@
 .tab.active .tab-icon {
   fill: var(--pink-300);
   transform: translateY(-1px);
-}
-
-.tab-settings {
-  grid-column: span 2;
 }
 
 .tab-scan {

@@ -15,9 +15,10 @@
   margin-bottom: 0;
 }
 
-.library-header .btn {
-  margin-top: 6px;
-  flex-shrink: 0;
+.library-header-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
 }
 
 .placeholder-actions {
@@ -25,6 +26,85 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
+}
+
+.search-row {
+  display: flex;
+  gap: 10px;
+}
+
+.search-row .search {
+  flex: 1;
+  min-width: 0;
+}
+
+.filter-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+}
+
+.filter-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--text);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: -4px;
+}
+
+.active-filters .chip {
+  min-height: 32px;
+  font-size: 0.8rem;
+}
+
+.backup-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -4px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+.backup-line .link-button {
+  min-height: 32px;
+  font-size: 0.85rem;
+}
+
+.backup-line-dismiss {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  color: var(--text-soft);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.filter-sheet-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.filter-sheet-actions .btn:first-child {
+  flex: 1;
 }
 
 .search {
@@ -36,7 +116,6 @@
   border: var(--outline);
   border-radius: 16px;
   background: var(--surface);
-  box-shadow: var(--pop);
 }
 
 .search:focus-within {
@@ -79,23 +158,3 @@
   .book-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
-.backup-reminder {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px 14px;
-  border: var(--outline);
-  border-radius: var(--radius-m);
-  background: var(--peach);
-  box-shadow: var(--pop-s);
-}
-
-.backup-reminder .hand {
-  font-size: 1.2rem;
-  line-height: 1.2;
-}
-
-.backup-reminder-buttons {
-  display: flex;
-  gap: 8px;
-}

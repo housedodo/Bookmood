@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type MutableRefObject } from 'react';
 import type { Book } from '../data/db';
 import { saveBlurb } from '../lib/moodInfo';
 import '../styles/blurb.css';
@@ -13,9 +13,26 @@ type State =
  * "Read the back cover": take a photo, the phone reads the text, you check it and save.
  * The text counts like a description for moods and automatic tags.
  */
-export default function BlurbPhoto({ book, onSaved, compact = false }: { book: Book; onSaved?: () => void; compact?: boolean }) {
+interface BlurbPhotoProps {
+  book: Book;
+  onSaved?: () => void;
+  compact?: boolean;
+  /** Lets a parent (e.g. a ⋯ menu) open the camera itself; then no button is shown while idle. */
+  openRef?: MutableRefObject<(() => void) | null>;
+}
+
+export default function BlurbPhoto({ book, onSaved, compact = false, openRef }: BlurbPhotoProps) {
   const input = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<State>({ step: 'idle' });
+
+  // Opening the file picker must happen right inside the tap (iOS), so the parent gets a direct function.
+  useEffect(() => {
+    if (!openRef) return;
+    openRef.current = () => input.current?.click();
+    return () => {
+      openRef.current = null;
+    };
+  }, [openRef]);
 
   const onPhoto = async (event: ChangeEvent<HTMLInputElement>) => {
     const photo = event.target.files?.[0];
@@ -48,10 +65,11 @@ export default function BlurbPhoto({ book, onSaved, compact = false }: { book: B
   };
 
   return (
-    <div className="blurb-photo">
+    // While idle and opened from a menu, only the hidden file input is here: take no space.
+    <div className={`blurb-photo ${state.step === 'idle' && openRef ? 'is-hidden' : ''}`}>
       <input ref={input} type="file" accept="image/*" capture="environment" className="visually-hidden" onChange={onPhoto} tabIndex={-1} aria-hidden="true" />
 
-      {state.step === 'idle' && (
+      {state.step === 'idle' && !openRef && (
         <button type="button" className={`btn btn-small ${compact ? '' : 'btn-secondary'}`} onClick={() => input.current?.click()}>
           {book.blurb ? 'Read the back cover again' : 'Read the back cover (photo)'}
         </button>

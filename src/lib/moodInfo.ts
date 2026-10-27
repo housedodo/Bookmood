@@ -10,6 +10,17 @@ export function moodUnknown(book: Book): boolean {
   return scoreBook(book, ALL_MOODS).score === 0;
 }
 
+/** The moods this book matches best, strongest first (the reader's own moods first). */
+export function bookMoods(book: Book, max = 3): string[] {
+  const own = book.moods ?? [];
+  const detected = MOODS.filter((m) => !own.includes(m.id))
+    .map((m) => ({ id: m.id, score: scoreBook({ ...book, moods: [] }, [m.id]).score }))
+    .filter((m) => m.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map((m) => m.id);
+  return [...own, ...detected].slice(0, Math.max(max, own.length));
+}
+
 /** Automatic tags from everything known about the book (subjects, subtitle, description, blurb). */
 export function autoTags(book: Pick<Book, 'subjects' | 'subtitle' | 'description' | 'blurb' | 'hiddenTags'>): string[] {
   return deriveTags([...book.subjects, book.subtitle ?? ''], [book.description ?? '', book.blurb ?? ''].join(' \n '), book.hiddenTags);

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { ReadStatus } from '../data/db';
 import { SORT_OPTIONS, type GenreCount, type LengthFilter, type LibraryFilters, type SortKey } from '../lib/library';
 import '../styles/filterbar.css';
@@ -22,44 +23,27 @@ interface FilterBarProps {
   sort: SortKey;
   onSortChange: (sort: SortKey) => void;
   genres: GenreCount[];
-  /** How many books the app can't tell the mood of; the filter chip only shows when there are some. */
+  /** How many books the app can't tell the mood of; that filter only shows when there are some. */
   moodUnknownCount: number;
 }
 
+/** The contents of the Library's "Filter & sort" sheet. */
 export default function FilterBar({ filters, onChange, sort, onSortChange, genres, moodUnknownCount }: FilterBarProps) {
   const set = (changes: Partial<LibraryFilters>) => onChange({ ...filters, ...changes });
 
   return (
     <div className="filter-bar">
-      <div className="chip-row" role="group" aria-label="Reading status">
+      <FilterGroup label="Reading status">
         {STATUSES.map(({ value, label }) => (
           <button key={value} type="button" className="chip" aria-pressed={filters.status === value} onClick={() => set({ status: value })}>
             {label}
           </button>
         ))}
-      </div>
-      <div className="chip-row" role="group" aria-label="Length">
-        {LENGTHS.map(({ value, label }) => (
-          <button key={value} type="button" className="chip" aria-pressed={filters.length === value} onClick={() => set({ length: value })}>
-            {label}
-          </button>
-        ))}
-      </div>
-      {(moodUnknownCount > 0 || filters.needsMoodInfo) && (
-        <div className="chip-row">
-          <button
-            type="button"
-            className="chip chip-needs-info"
-            aria-pressed={filters.needsMoodInfo}
-            onClick={() => set({ needsMoodInfo: !filters.needsMoodInfo })}
-          >
-            Mood unknown ({moodUnknownCount})
-          </button>
-        </div>
-      )}
+      </FilterGroup>
+
       {genres.length > 0 && (
         // One genre at a time; tapping the selected one again shows all genres.
-        <div className="chip-row" role="group" aria-label="Genre">
+        <FilterGroup label="Genre">
           <button type="button" className="chip" aria-pressed={!filters.genre} onClick={() => set({ genre: '' })}>
             All genres
           </button>
@@ -74,15 +58,48 @@ export default function FilterBar({ filters, onChange, sort, onSortChange, genre
               {genre} <span className="chip-count">{count}</span>
             </button>
           ))}
-        </div>
+        </FilterGroup>
       )}
-      <div className="filter-selects">
-        <label className="visually-hidden" htmlFor="sort">Sort by</label>
+
+      <FilterGroup label="Length">
+        {LENGTHS.map(({ value, label }) => (
+          <button key={value} type="button" className="chip" aria-pressed={filters.length === value} onClick={() => set({ length: value })}>
+            {label}
+          </button>
+        ))}
+      </FilterGroup>
+
+      {(moodUnknownCount > 0 || filters.needsMoodInfo) && (
+        <FilterGroup label="Needs attention">
+          <button
+            type="button"
+            className="chip chip-needs-info"
+            aria-pressed={filters.needsMoodInfo}
+            onClick={() => set({ needsMoodInfo: !filters.needsMoodInfo })}
+          >
+            Mood unknown <span className="chip-count">{moodUnknownCount}</span>
+          </button>
+        </FilterGroup>
+      )}
+
+      <div className="filter-group">
+        <label className="filter-label" htmlFor="sort">Sort by</label>
         <select id="sort" className="select" value={sort} onChange={(e) => onSortChange(e.target.value as SortKey)}>
           {SORT_OPTIONS.map(({ key, label }) => (
             <option key={key} value={key}>{label}</option>
           ))}
         </select>
+      </div>
+    </div>
+  );
+}
+
+function FilterGroup({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="filter-group">
+      <span className="filter-label">{label}</span>
+      <div className="filter-chips" role="group" aria-label={label}>
+        {children}
       </div>
     </div>
   );

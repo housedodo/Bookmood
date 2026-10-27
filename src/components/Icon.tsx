@@ -9,6 +9,9 @@ const PATHS = {
   plus: 'M12 5v14M5 12h14',
   close: 'M6 6l12 12M18 6L6 18',
   trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',
+  back: 'M15 5l-7 7 7 7',
+  filter: 'M4 6h16M7 12h10M10 18h4',
+  more: 'M5 12h.01M12 12h.01M19 12h.01',
 } as const;
 
 export type IconName = keyof typeof PATHS;

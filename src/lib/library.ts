@@ -84,3 +84,26 @@ export function libraryGenres(books: Book[]): GenreCount[] {
     .map(([genre, count]) => ({ genre, count }))
     .sort((a, b) => b.count - a.count || byText(a.genre, b.genre));
 }
+
+export interface ActiveFilter {
+  key: keyof LibraryFilters;
+  label: string;
+}
+
+const STATUS_LABEL = { unread: 'Unread', reading: 'Reading', read: 'Read' } as const;
+const LENGTH_LABEL = { short: 'Short', medium: 'Medium', long: 'Long' } as const;
+
+/** The filters that are switched on, as removable pills ("Unread ×", "Romance ×"). Search isn't one. */
+export function activeFilters(filters: LibraryFilters): ActiveFilter[] {
+  const active: ActiveFilter[] = [];
+  if (filters.status !== 'all') active.push({ key: 'status', label: STATUS_LABEL[filters.status] });
+  if (filters.genre) active.push({ key: 'genre', label: filters.genre });
+  if (filters.length !== 'any') active.push({ key: 'length', label: LENGTH_LABEL[filters.length] });
+  if (filters.needsMoodInfo) active.push({ key: 'needsMoodInfo', label: 'Mood unknown' });
+  return active;
+}
+
+/** Turns one filter back off. */
+export function clearFilter(filters: LibraryFilters, key: keyof LibraryFilters): LibraryFilters {
+  return { ...filters, [key]: DEFAULT_FILTERS[key] };
+}

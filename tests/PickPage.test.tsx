@@ -38,9 +38,7 @@ describe('PickPage', () => {
     await addBook({ isbn13: '4', title: 'No One Saw a Thing', authors: ['Andrea Mara'], source: 'openlibrary' });
     await addBook({ isbn13: '5', title: 'Cold Case', subjects: ['Mystery'], source: 'manual' });
     renderPage();
-    const row = await screen.findByRole('region', { name: 'Books with unknown mood' });
-    expect(within(row).getByText(/this book/)).toBeInTheDocument();
-    expect(within(row).getByRole('button', { name: /No One Saw a Thing/ })).toBeInTheDocument();
-    expect(within(row).queryByRole('button', { name: /Cold Case/ })).not.toBeInTheDocument();
+    const link = await screen.findByRole('link', { name: /1 book needs a back-cover photo/ });
+    expect(link).toHaveAttribute('href', '/?unknown=1');
   });
 });

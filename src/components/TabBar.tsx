@@ -9,11 +9,11 @@ interface Tab {
   className?: string;
 }
 
+// Three tabs keep the bar calm; Settings opens from the gear on the Shelf page.
 const TABS: Tab[] = [
-  { to: '/', label: 'Library', icon: 'library' },
-  { to: '/pick', label: 'Pick', icon: 'heart' },
+  { to: '/', label: 'Shelf', icon: 'library' },
   { to: '/scan', label: 'Scan', icon: 'scan', className: 'tab-scan' },
-  { to: '/settings', label: 'Settings', icon: 'settings', className: 'tab-settings' },
+  { to: '/pick', label: 'Pick', icon: 'heart' },
 ];
 
 export default function TabBar() {

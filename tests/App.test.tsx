@@ -18,7 +18,8 @@ describe('App scaffold', () => {
     render(<App />);
     await userEvent.click(screen.getByRole('link', { name: 'Pick' }));
     expect(screen.getByRole('heading', { name: /What are you in the mood for/ })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('link', { name: 'Settings' }));
+    await userEvent.click(screen.getByRole('link', { name: 'Shelf' }));
+    await userEvent.click(await screen.findByRole('link', { name: 'Settings' }));
     expect(screen.getByText(/all your data lives only on this device/)).toBeInTheDocument();
   });
 });

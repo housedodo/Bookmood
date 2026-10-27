@@ -6,8 +6,6 @@ import MoodPicker from '../components/MoodPicker';
 import PickResult from '../components/PickResult';
 import Toast, { type ToastData } from '../components/Toast';
 import { db, updateBook, type Book } from '../data/db';
-import BookCover from '../components/BookCover';
-import { bookThemeStyle } from '../lib/bookTheme';
 import { moodUnknown } from '../lib/moodInfo';
 import { recommend, surprise } from '../lib/recommend';
 import { notNowIds } from '../lib/session';
@@ -153,18 +151,12 @@ export default function PickPage() {
           )}
 
           {moodUnknownBooks.length > 0 && (
-            <section className="pick-unknown" aria-label="Books with unknown mood">
-              <h2>I can't tell the mood of {moodUnknownBooks.length === 1 ? 'this book' : `these ${moodUnknownBooks.length} books`} yet</h2>
-              <p className="hand">Open one and snap its back cover — then it can show up here ♡</p>
-              <div className="pick-unknown-row">
-                {moodUnknownBooks.map((book) => (
-                  <button key={book.id} type="button" className="pick-unknown-book book-theme" style={bookThemeStyle(book.themeHue)} onClick={() => open(book)}>
-                    <BookCover book={book} />
-                    <span>{book.title}</span>
-                  </button>
-                ))}
-              </div>
-            </section>
+            <p className="pick-unknown-line">
+              <Link to="/?unknown=1">
+                {moodUnknownBooks.length === 1 ? '1 book needs' : `${moodUnknownBooks.length} books need`} a back-cover photo before I can tell
+                {moodUnknownBooks.length === 1 ? ' its' : ' their'} mood
+              </Link>
+            </p>
           )}
         </>
       )}

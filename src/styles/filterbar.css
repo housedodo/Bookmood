@@ -1,37 +1,25 @@
 .filter-bar {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 18px;
 }
 
-/* Chips scroll sideways on narrow phones instead of wrapping into many lines. */
-.chip-row {
+.filter-group {
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  overflow-x: auto;
-  margin: 0 -16px;
-  padding: 2px 16px 6px;
-  scrollbar-width: none;
 }
 
-.chip-row::-webkit-scrollbar {
-  display: none;
-}
-
-.filter-selects {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 10px;
-}
-
-.filter-selects .select {
-  min-height: 42px;
-  font-size: 0.9rem;
+.filter-label {
+  font-family: var(--font-heading);
   font-weight: 600;
+  font-size: 0.9rem;
 }
 
-.chip-needs-info {
-  background: var(--peach);
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .chip-count {
@@ -45,4 +33,8 @@
 
 .chip[aria-pressed='true'] .chip-count {
   background: var(--surface);
+}
+
+.chip-needs-info {
+  background: var(--peach);
 }

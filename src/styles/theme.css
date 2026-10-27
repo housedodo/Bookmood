@@ -301,3 +301,52 @@ button {
   font-family: var(--font-heading);
   font-size: 0.9rem;
 }
+
+/* Square outlined icon button (gear, filter, close, ⋯). */
+.icon-button {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: var(--outline);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.icon-button svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon-button.is-accent {
+  background: var(--pink-400);
+  box-shadow: var(--pop-s);
+}
+
+.icon-button:focus-visible {
+  outline: 3px solid var(--pink-400);
+  outline-offset: 2px;
+}
+
+.back-link {
+  margin-bottom: 12px;
+}
+
+.btn-icon {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

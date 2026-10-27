@@ -1,5 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { Link } from 'react-router-dom';
+import Icon from '../components/Icon';
 import Toast, { type ToastData } from '../components/Toast';
 import { db } from '../data/db';
 import { downloadFile, exportBackupNow, exportCsv, importJson } from '../lib/exportImport';
@@ -79,6 +81,9 @@ export default function SettingsPage() {
   return (
     <main className="page settings">
       <header>
+        <Link to="/" className="icon-button back-link" aria-label="Back to shelf">
+          <Icon name="back" />
+        </Link>
         <h1 className="page-title">Settings</h1>
         <p className="page-subtitle">backups &amp; little things</p>
       </header>

@@ -148,8 +148,8 @@ export default function ScanPage() {
 
       {stickerHint && !busy && (
         <p className="scan-sticker-hint" role="status">
-          <span className="hand">That's not a book barcode — maybe a shop sticker?</span> Peel it off if it comes off easily, or type the
-          ISBN / search by title below ♡
+          <span className="hand">That's not a book barcode — maybe a shop sticker?</span> Peel it off if it comes off easily, or
+          type the ISBN below. It's also printed inside the book, on the copyright page.
         </p>
       )}
 
@@ -183,10 +183,6 @@ export default function ScanPage() {
       )}
 
       <section className="scan-backup">
-        <p className="scan-tip">
-          <strong>Sticker over the barcode?</strong> The ISBN is also printed inside the book, on the copyright page (usually the
-          back of the title page).
-        </p>
         <IsbnLookup onAdded={onAdded} onDuplicate={onDuplicate} onNotFound={(isbn) => setManual({ isbn, offline: !navigator.onLine })} />
         {showTitleSearch ? (
           <BookSearch onPick={onPickTitle} />
