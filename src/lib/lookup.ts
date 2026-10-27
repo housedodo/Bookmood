@@ -23,6 +23,7 @@ export interface LookupResult {
 
 export const openLibraryUrl = (isbn: string) =>
   `https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`;
+export const googleBooksProxyUrl = (isbn: string) => `/api/google-books?isbn=${isbn}`;
 export const googleBooksUrl = (isbn: string) =>
   `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`;
 // default=false makes Open Library answer 404 instead of a blank image when there is no cover.
@@ -181,7 +182,10 @@ export async function lookup(isbn13: string, options: LookupOptions = {}): Promi
   }
 
   if (!result?.description) {
-    const fromGoogle = parseGoogleBooks(await fetchJson(googleBooksUrl(isbn13), options), isbn13);
+    // Google allows no requests without a key, so the app's Worker adds one (if set up); direct is the fallback.
+    const fromGoogle =
+      parseGoogleBooks(await fetchJson(googleBooksProxyUrl(isbn13), options), isbn13) ??
+      parseGoogleBooks(await fetchJson(googleBooksUrl(isbn13), options), isbn13);
     if (fromGoogle) {
       sources.push('googlebooks');
       result = result ? mergeResults(result, fromGoogle) : fromGoogle;

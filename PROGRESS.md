@@ -234,6 +234,14 @@ Real-world case: "FOR INTERNATIONAL SALE" / "International Edition" copies (e.g.
 - Picking a search result runs `addWithInfoFrom(scannedIsbn, picked)` (`addBook.ts`): looks up the picked edition's ISBN, saves its info (title, authors, pages, description, subjects, genres, tags, cover — plus the search's own cover id as an extra candidate) but under the **scanned ISBN**, so rescanning the same copy says "Already in your library". The edition used is stored in the new optional `Book.infoIsbn`; **Refresh book info** looks that one up (`refresh.ts`). If the picked work has no ISBN-13 or its lookup fails, the hand form opens pre-filled with title + author + scanned ISBN.
 - Tests: `tests/addBook.test.ts`. Browser check done with the first ISBN above (search answers simulated).
 
+### Google Books through the Worker (optional free API key)
+- Tested on the user's phone: Google Books without a key answers `429` with `"quota_limit_value": "0"` — anonymous use is **switched off entirely**, so Google never contributed anything. With a free key Google allows 1,000 requests/day.
+- `worker/index.ts`: `apiTarget()` now also maps `/api/google-books?isbn=<13 digits>` to Google Books **with the key from the Worker secret `GOOGLE_BOOKS_KEY`** (only when set; ISBN-only, nothing else is forwarded). Successful answers are cached for a day; errors aren't cached.
+- `lookup.ts`: Google step asks `/api/google-books` first, then Google directly as a fallback (still useful if Google ever reopens anonymous access).
+- Without the secret everything works as before. The key lives only in Cloudflare (never in the app bundle or the repo) — a deliberate, user-approved exception to "no API keys"; it costs nothing.
+- **Set-up:** Google Cloud Console → new project → APIs & Services → Library → enable **Books API** → Credentials → Create credentials → API key → restrict it to the Books API. Cloudflare → Worker `bookmood` → Settings → Variables and Secrets → Add → type **Secret**, name `GOOGLE_BOOKS_KEY`, value = the key → Deploy. Check: `https://<app>/api/google-books?isbn=9780593334836` should show JSON with `"totalItems"`.
+- Tests: worker key handling in `tests/worker.test.ts`, proxy-first in `tests/lookup.test.ts`.
+
 ## Known risks / to verify on a real phone
 
 - **Cover CORS:** covers are fetched with `fetch()` so the Blob can be stored. If a cover host doesn't send CORS headers, the download fails and the book falls back to the title hue and no stored cover. Check in Phase 5 with real scans.

@@ -64,6 +64,8 @@ This repo is set up for **Cloudflare Workers** with static assets (`wrangler.jso
 
 The Worker's name in the dashboard must match `"name"` in `wrangler.jsonc` (`bookmood`).
 
+**Optional — Google Books:** Google no longer answers book lookups without an API key. A free key (Google Cloud Console → enable *Books API* → create an API key, restricted to the Books API) goes into the Worker as a secret: **Settings → Variables and Secrets → Add → Secret**, name `GOOGLE_BOOKS_KEY`. The key stays in Cloudflare; it is never part of the app or this repo. Without it the app uses Open Library, the DNB and Wikipedia.
+
 From then on, every push to `main` redeploys automatically. Other branches get their own preview links. **Settings → "Version built …"** in the app shows which build your phone has.
 
 ### Cloudflare Pages instead

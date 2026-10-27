@@ -130,6 +130,22 @@ describe('lookup with the Open Library work record', () => {
   });
 });
 
+describe('Google Books through the Worker', () => {
+  it('asks the Worker (which adds the API key) before calling Google directly', async () => {
+    const calls: string[] = [];
+    const fetchImpl: typeof fetch = async (input) => {
+      const url = String(input);
+      calls.push(url);
+      if (url.startsWith('/api/google-books')) return new Response(JSON.stringify(gbBook));
+      return new Response('{}');
+    };
+    const result = await lookup(ISBN, { fetchImpl });
+    expect(result).toMatchObject({ source: 'googlebooks', title: 'Book Lovers' });
+    expect(calls).toContain(`/api/google-books?isbn=${ISBN}`);
+    expect(calls.some((url) => url.startsWith('https://www.googleapis.com'))).toBe(false);
+  });
+});
+
 describe('subtitles', () => {
   it('keeps the subtitle out of the title', async () => {
     const withSubtitle = { [`ISBN:${ISBN}`]: { ...olBook[`ISBN:${ISBN}`], subtitle: 'A Novel' } };
