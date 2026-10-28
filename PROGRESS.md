@@ -241,6 +241,7 @@ Real-world case: "FOR INTERNATIONAL SALE" / "International Edition" copies (e.g.
 - Without the secret everything works as before. The key lives only in Cloudflare (never in the app bundle or the repo) — a deliberate, user-approved exception to "no API keys"; it costs nothing.
 - **Set-up:** Google Cloud Console → new project → APIs & Services → Library → enable **Books API** → Credentials → Create credentials → API key → restrict it to the Books API. Cloudflare → Worker `bookmood` → Settings → Variables and Secrets → Add → type **Secret**, name `GOOGLE_BOOKS_KEY`, value = the key → Deploy. Check: `https://<app>/api/google-books?isbn=9780593334836` should show JSON with `"totalItems"`.
 - Tests: worker key handling in `tests/worker.test.ts`, proxy-first in `tests/lookup.test.ts`.
+- Gotchas found while setting it up: (1) the service worker answered *navigations* to `/api/…` with the app page — fixed with `navigateFallbackDenylist: [/^\/api\//]` (the app's own fetches were never affected); (2) the key must be a **runtime** secret (Settings → Variables and Secrets), not a *build* variable; `"keep_vars": true` in `wrangler.jsonc` keeps dashboard variables across deploys. The Worker answers `Not found` for `/api/google-books` when it doesn't see the key.
 
 ## Known risks / to verify on a real phone
 

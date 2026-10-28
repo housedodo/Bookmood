@@ -5,6 +5,8 @@
   "compatibility_date": "2025-10-01",
   "workers_dev": true,
   "preview_urls": true,
+  // Keep variables set in the Cloudflare dashboard (e.g. GOOGLE_BOOKS_KEY) when deploying.
+  "keep_vars": true,
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",

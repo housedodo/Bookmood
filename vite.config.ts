@@ -39,6 +39,8 @@ export default defineConfig({
           },
         ],
         navigateFallback: 'index.html',
+        // Opening /api/… in the address bar must reach the Worker, not get the app page.
+        navigateFallbackDenylist: [/^\/api\//],
       },
     }),
   ],
