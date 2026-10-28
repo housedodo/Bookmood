@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useCallback, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import BackupReminder from '../components/BackupReminder';
+import InstallHint from '../components/InstallHint';
 import BookCard from '../components/BookCard';
 import Bookcase from '../components/Bookcase';
 import BookDetail from '../components/BookDetail';
@@ -101,6 +102,7 @@ export default function LibraryPage() {
             </div>
           )}
 
+          <InstallHint />
           <BackupReminder books={books} />
 
           {!showResults && (

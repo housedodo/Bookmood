@@ -47,7 +47,7 @@ Open the `https://….trycloudflare.com` link it prints on your phone and allow 
 ### Install it like an app
 
 - **iPhone (Safari):** Share button → **Add to Home Screen**.
-- **Android (Chrome):** menu ⋮ → **Install app** (or **Add to Home screen**).
+- **Android:** tap **Install** on the Shelf page or **Settings → Install ShelfScan**. Or in Chrome: menu ⋮ → **Install app**; in Samsung Internet: menu ☰ → **Add page to → Home screen**.
 
 ## Deploy for free on Cloudflare
 

@@ -10,6 +10,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/apple-touch-icon.png', 'icons/favicon-64.png'],
       manifest: {
+        id: './',
         name: 'ShelfScan',
         short_name: 'ShelfScan',
         description: 'Scan your books, keep a cozy shelf, and pick your next read by mood.',

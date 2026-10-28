@@ -248,6 +248,14 @@ Real-world case: "FOR INTERNATIONAL SALE" / "International Edition" copies (e.g.
 - Google Books key is set up and working (Worker secret `GOOGLE_BOOKS_KEY`); Google returned `totalItems: 0` for the international edition 979-8-217-30075-4, which is why the cover option exists.
 - Tests: `coverSearchText` in `tests/ocr.test.ts`, `'any'` search URL in `tests/lookup.test.ts`. **Browser check done** with a generated, slightly blurred and rotated front cover ("The Strength of the Few" / James Islington, with a small "New York Times bestselling author…" tagline): read in ~2 s as "THE STRENGTH OF THE FEW JAMES ISLINGTON", tagline dropped, picked result saved as isbn13 9781668216774 with infoIsbn of the found edition.
 
+### Installing on Android
+- Chrome's own check (`Page.getInstallabilityErrors` via DevTools, Pixel 7 emulation) reports **no installability errors** — the manifest, icons (192/512 + maskable) and service worker were already enough. Android just doesn't advertise it loudly.
+- `src/lib/install.ts`: `captureInstallPrompt()` (called in `main.tsx` before React renders) keeps Android's `beforeinstallprompt` event; `promptInstall()` opens the real install dialog; `useCanInstall()` tells components when that's possible.
+- **Settings → "Install the app"** (`InstallApp.tsx`): **Install ShelfScan** button on Android; "installed ✓" when running from the home screen; instructions for iPhone Safari, and for Chrome / Samsung Internet when the browser offers no dialog.
+- **Shelf page**: one quiet line "Get ShelfScan on your home screen · Install ×" while installing is possible (× hides it for good, `prefs` key `installHint`).
+- Manifest now has `id: './'` so the installed app keeps its identity.
+- Tests: `tests/install.test.tsx` (simulated install event → button → dialog → "installed").
+
 ## Known risks / to verify on a real phone
 
 - **Cover CORS:** covers are fetched with `fetch()` so the Blob can be stored. If a cover host doesn't send CORS headers, the download fails and the book falls back to the title hue and no stored cover. Check in Phase 5 with real scans.

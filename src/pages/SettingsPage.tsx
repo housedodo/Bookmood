@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from '../components/Icon';
+import InstallApp from '../components/InstallApp';
 import Toast, { type ToastData } from '../components/Toast';
 import { db } from '../data/db';
 import { downloadFile, exportBackupNow, exportCsv, importJson } from '../lib/exportImport';
@@ -87,6 +88,11 @@ export default function SettingsPage() {
         <h1 className="page-title">Settings</h1>
         <p className="page-subtitle">backups &amp; little things</p>
       </header>
+
+      <section className="settings-card">
+        <h2>Install the app</h2>
+        <InstallApp />
+      </section>
 
       <section className="settings-card settings-safety">
         <h2>Keep your books safe</h2>
