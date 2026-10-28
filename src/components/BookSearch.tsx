@@ -3,7 +3,7 @@ import { searchBooks, type SearchBy, type TitleSearchResult } from '../lib/looku
 import Icon from './Icon';
 import '../styles/form.css';
 
-const PLACEHOLDER: Record<SearchBy, string> = { title: 'Book title', author: 'Author name, e.g. Andrea Mara' };
+const PLACEHOLDER: Record<SearchBy, string> = { title: 'Book title', author: 'Author name, e.g. Andrea Mara', any: 'Title and author' };
 
 /** Backup to scanning: find a book on Open Library by its title or its author, then pick it. */
 export default function BookSearch({ onPick }: { onPick: (result: TitleSearchResult) => void }) {

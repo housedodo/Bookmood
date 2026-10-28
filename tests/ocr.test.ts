@@ -1,4 +1,4 @@
-import { cleanOcrText } from '../src/lib/ocr';
+import { cleanOcrText, coverSearchText } from '../src/lib/ocr';
 import { createBook } from '../src/data/db';
 import { autoTags, moodUnknown } from '../src/lib/moodInfo';
 
@@ -26,5 +26,28 @@ describe('mood info', () => {
 
   it('finds trope tags in the back-cover text', () => {
     expect(autoTags({ ...bare(), blurb: 'Snowed in at a small-town inn with her rival…' })).toEqual(['forced proximity', 'small town']);
+  });
+});
+
+describe('coverSearchText', () => {
+  const line = (text: string, height: number, confidence = 90) => ({ text, height, confidence });
+
+  it('keeps the biggest lines (title, author) and drops marketing lines', () => {
+    const lines = [
+      line('THE NEW YORK TIMES BESTSELLING AUTHOR OF THE WILL OF THE MANY', 18),
+      line('THE STRENGTH', 120),
+      line('OF THE FEW', 110),
+      line('JAMES ISLINGTON', 60),
+      line('A Novel', 30),
+    ];
+    expect(coverSearchText(lines)).toBe('THE STRENGTH OF THE FEW JAMES ISLINGTON');
+  });
+
+  it('ignores low-confidence and garbage lines', () => {
+    expect(coverSearchText([line('~~ |// ..', 200), line('Kin', 90), line('xQ#', 150, 10), line('Tayari Jones', 50)])).toBe('Kin Tayari Jones');
+  });
+
+  it('returns an empty string when nothing is readable', () => {
+    expect(coverSearchText([line('|||', 100)])).toBe('');
   });
 });

@@ -171,6 +171,16 @@ describe('searchByTitle', () => {
     expect(results[2].authors).toEqual([]);
   });
 
+  it('searches title and author together for text read from a cover', async () => {
+    const urls: string[] = [];
+    const fetchImpl: typeof fetch = async (input) => {
+      urls.push(String(input));
+      return new Response(JSON.stringify(searchFixture));
+    };
+    await searchBooks('Book Lovers Emily Henry', 'any', { fetchImpl });
+    expect(urls[0]).toContain('search.json?q=Book%20Lovers%20Emily%20Henry&limit=10');
+  });
+
   it('searches by author with the author field', async () => {
     const urls: string[] = [];
     const fetchImpl: typeof fetch = async (input) => {

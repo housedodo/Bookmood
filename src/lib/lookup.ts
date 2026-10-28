@@ -227,13 +227,14 @@ export interface TitleSearchResult {
   coverUrl?: string;
 }
 
-export type SearchBy = 'title' | 'author';
+/** 'any' searches title and author together (used with text read from a front cover). */
+export type SearchBy = 'title' | 'author' | 'any';
 
 const SEARCH_FIELDS = 'key,title,author_name,isbn,first_publish_year,cover_i';
 
 export const bookSearchUrl = (query: string, by: SearchBy) =>
   // An author usually has more books than one title has editions, so show more results.
-  `https://openlibrary.org/search.json?${by}=${encodeURIComponent(query)}&limit=${by === 'author' ? 30 : 10}&fields=${SEARCH_FIELDS}`;
+  `https://openlibrary.org/search.json?${by === 'any' ? 'q' : by}=${encodeURIComponent(query)}&limit=${by === 'author' ? 30 : 10}&fields=${SEARCH_FIELDS}`;
 
 export const titleSearchUrl = (query: string) => bookSearchUrl(query, 'title');
 

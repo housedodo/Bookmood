@@ -8,6 +8,7 @@ import ManualAddForm from '../components/ManualAddForm';
 import Scanner from '../components/Scanner';
 import Sheet from '../components/Sheet';
 import BookSearch from '../components/BookSearch';
+import CoverSearch from '../components/CoverSearch';
 import Toast, { type ToastData } from '../components/Toast';
 import { db, deleteBook, updateBook, type Book } from '../data/db';
 import { addByIsbn, addWithInfoFrom, type AddByIsbnResult } from '../lib/addBook';
@@ -211,10 +212,18 @@ export default function ScanPage() {
           {canSearchForScanned ? (
             <>
               <p className="scan-manual-hint">
-                This ISBN isn't in the free book databases — that's common for <strong>international editions</strong>. Find the
-                book by its title or author and I'll use that edition's info, but keep your scanned ISBN.
+                This ISBN isn't in the free book databases — that's common for <strong>international editions</strong>. Snap the
+                front cover and I'll find the book, using its info but keeping your scanned ISBN.
               </p>
-              {picking ? <p className="hand" role="status">Getting the book's info…</p> : <BookSearch onPick={pickForScanned} />}
+              {picking ? (
+                <p className="hand" role="status">Getting the book's info…</p>
+              ) : (
+                <>
+                  <CoverSearch onPick={pickForScanned} />
+                  <p className="form-divider hand">or search by title or author</p>
+                  <BookSearch onPick={pickForScanned} />
+                </>
+              )}
               <p className="form-divider hand">or fill it in yourself</p>
             </>
           ) : (

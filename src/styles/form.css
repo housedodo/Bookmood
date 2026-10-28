@@ -97,3 +97,14 @@
   font-size: 0.8rem;
   color: var(--text-soft);
 }
+
+.cover-search {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.cover-search > .link-button {
+  align-self: flex-start;
+}
