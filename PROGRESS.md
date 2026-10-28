@@ -256,6 +256,14 @@ Real-world case: "FOR INTERNATIONAL SALE" / "International Edition" copies (e.g.
 - Manifest now has `id: './'` so the installed app keeps its identity.
 - Tests: `tests/install.test.tsx` (simulated install event → button → dialog → "installed").
 
+### Camera focus (barcode hard to get sharp)
+- Likely causes on real phones: the browser picks the **ultra-wide lens** (fixed focus, can't focus close up), or the book is held too close for the main lens.
+- `src/lib/camera.ts` (new): `openBackCamera()` opens the back camera at 1080p; if that camera reports focus modes but no continuous autofocus, it tries the other back cameras (main lens "camera2 0" first, ultra-wide/tele/macro last, front cameras skipped, max 4 tries) and keeps the first that autofocuses; then turns on `focusMode: 'continuous'`. `cameraControls(stream)` gives zoom (range + clamped `setZoom`), torch, and `focusAt(x, y)` (point focus, back to continuous after 2 s). Everything is optional and fails quietly — iPhone Safari offers almost none of it and simply keeps its default camera.
+- `barcode.ts`: uses `openBackCamera()`, ZXing now decodes from that stream with `TRY_HARDER`; the handle exposes `camera` controls.
+- `Scanner.tsx`: top-right **2× / 1×** zoom button (when the camera zooms to ≥1.5×) and **torch** button (when available); **tap the picture to focus** there (a small ring shows where). Help text: "Hold the barcode in the frame · blurry? tap it or try 2× ♡" (or "…a hand's width away ♡" without controls). Zoom lets you hold the book farther away, where the lens can focus.
+- Bug fixed on the way: in **Batch** mode the camera could still pause when a lookup finished after toggling Batch on (the value was read from when the scan started). `ScanPage` now reads it through a ref.
+- Tests: `tests/camera.test.ts` (lens ordering, switching away from a fixed-focus lens, zoom clamp, torch, iPhone-like no capabilities). Browser check with Chromium's fake camera and simulated capabilities: continuous focus, zoom 2 and point focus were applied, the barcode was read and the book added. **Not testable here on a real phone** — please try it.
+
 ## Known risks / to verify on a real phone
 
 - **Cover CORS:** covers are fetched with `fetch()` so the Blob can be stored. If a cover host doesn't send CORS headers, the download fails and the book falls back to the title hue and no stored cover. Check in Phase 5 with real scans.
@@ -263,7 +271,7 @@ Real-world case: "FOR INTERNATIONAL SALE" / "International Edition" copies (e.g.
 - **Front-cover photo on real covers**: stylised/decorative title fonts, titles over busy artwork and vertical text can be misread; then the user fixes the text in the field and searches again.
 - **Back-cover photo on a real phone**: speed (expect ~5–15 s on a phone; the first time also downloads ~16 MB) and accuracy with glossy covers, curved spines and small print. Tip: good light, phone held flat over the back cover, blurb filling most of the photo.
 - **DNB through the Worker** is only testable on the deployed site (this sandbox can't reach the DNB). If a German book shows "From Open Library" only, check `https://<your-app>/api/dnb?isbn=<isbn>` in the browser — it should show XML.
-- **Camera on iPhone**: only tested in desktop Chromium with a fake camera. Needs a real test in iOS Safari (HTTPS link, allow camera, scan a few books). Focus on small barcodes can be slow on some phones — hold the book 15–25 cm away.
+- **Camera on iPhone**: only tested in desktop Chromium with a fake camera. Needs a real test in iOS Safari (HTTPS link, allow camera, scan a few books). Focus on small barcodes can be slow on some phones — hold the book 15–25 cm away, or use 2× / tap to focus (Android).
 - **BarcodeDetector path** (Android Chrome) is untested here — the test browser on Linux has no BarcodeDetector, so ZXing was used.
 
 - **Home-screen install on iPhone**: iOS keeps a home-screen app's storage separate from Safari's. Books added in Safari don't appear in the installed app (and vice versa). Use export/import to move them, or just use the installed app.

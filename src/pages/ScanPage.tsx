@@ -30,6 +30,11 @@ interface ManualPrefill {
 export default function ScanPage() {
   const navigate = useNavigate();
   const [batch, setBatch] = useState(false);
+  // Read when a lookup finishes, which can be after the toggle changed: always the current value.
+  const batchRef = useRef(batch);
+  useEffect(() => {
+    batchRef.current = batch;
+  }, [batch]);
   const [cameraOn, setCameraOn] = useState(true);
   const [busy, setBusy] = useState(false);
   const [added, setAdded] = useState<Book[]>([]);
@@ -61,7 +66,7 @@ export default function ScanPage() {
     setAdded((list) => [book, ...list.filter((b) => b.id !== book.id)]);
     setUndoId(book.id);
     setConfettiKey((n) => n + 1);
-    if (!batch) setCameraOn(false);
+    if (!batchRef.current) setCameraOn(false);
   };
 
   const onDuplicate = (book: Book) => {

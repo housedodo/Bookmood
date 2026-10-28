@@ -12,6 +12,7 @@ const PATHS = {
   back: 'M15 5l-7 7 7 7',
   filter: 'M4 6h16M7 12h10M10 18h4',
   more: 'M5 12h.01M12 12h.01M19 12h.01',
+  torch: 'M8 3h8l-1 6H9zM9 9l1 12h4l1-12M12 13v3',
 } as const;
 
 export type IconName = keyof typeof PATHS;

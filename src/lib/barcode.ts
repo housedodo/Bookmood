@@ -1,17 +1,15 @@
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { BarcodeFormat, DecodeHintType } from '@zxing/library';
+import { cameraControls, openBackCamera, type CameraControls } from './camera';
 import { isValidIsbn13, normalizeIsbn } from './isbn';
 
 export type CameraError = 'denied' | 'unavailable' | 'insecure';
 
 export interface ScannerHandle {
   stop: () => void;
+  /** Zoom, torch and tap-to-focus, where the phone supports them. */
+  camera: CameraControls;
 }
-
-const CAMERA: MediaStreamConstraints = {
-  audio: false,
-  video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
-};
 
 // Book barcodes are EAN-13. The others are read only to notice shop stickers and say so.
 const DETECTOR_FORMATS = ['ean_13', 'ean_8', 'upc_a', 'code_128'];
@@ -39,8 +37,12 @@ async function nativeDetector(): Promise<DetectorLike | null> {
 }
 
 /** Fast path: BarcodeDetector polling the video ~6 times per second. */
-async function startNative(video: HTMLVideoElement, detector: DetectorLike, onCode: (code: string) => void): Promise<ScannerHandle> {
-  const stream = await navigator.mediaDevices.getUserMedia(CAMERA);
+async function startNative(
+  video: HTMLVideoElement,
+  stream: MediaStream,
+  detector: DetectorLike,
+  onCode: (code: string) => void,
+): Promise<() => void> {
   video.srcObject = stream;
   await video.play();
   let stopped = false;
@@ -56,23 +58,23 @@ async function startNative(video: HTMLVideoElement, detector: DetectorLike, onCo
     if (!stopped) setTimeout(tick, 160);
   };
   void tick();
-  return {
-    stop: () => {
-      stopped = true;
-      stream.getTracks().forEach((track) => track.stop());
-      video.srcObject = null;
-    },
+  return () => {
+    stopped = true;
   };
 }
 
 /** Fallback that works everywhere, including iPhone Safari. */
-async function startZxing(video: HTMLVideoElement, onCode: (code: string) => void): Promise<ScannerHandle> {
-  const hints = new Map<DecodeHintType, unknown>([[DecodeHintType.POSSIBLE_FORMATS, ZXING_FORMATS]]);
+async function startZxing(video: HTMLVideoElement, stream: MediaStream, onCode: (code: string) => void): Promise<() => void> {
+  const hints = new Map<DecodeHintType, unknown>([
+    [DecodeHintType.POSSIBLE_FORMATS, ZXING_FORMATS],
+    // Slower per frame, but finds barcodes in slightly blurry or tilted pictures.
+    [DecodeHintType.TRY_HARDER, true],
+  ]);
   const reader = new BrowserMultiFormatReader(hints, { delayBetweenScanAttempts: 120, delayBetweenScanSuccess: 300 });
-  const controls = await reader.decodeFromConstraints(CAMERA, video, (result) => {
+  const controls = await reader.decodeFromStream(stream, video, (result) => {
     if (result) onCode(result.getText());
   });
-  return { stop: () => controls.stop() };
+  return () => controls.stop();
 }
 
 export function cameraErrorKind(error: unknown): CameraError {
@@ -100,10 +102,22 @@ export async function startScanner(
     if (isValidIsbn13(isbn)) onIsbn(isbn);
     else onOther(code);
   };
+  let stream: MediaStream | undefined;
   try {
+    stream = await openBackCamera();
     const detector = await nativeDetector();
-    return detector ? await startNative(video, detector, onCode) : await startZxing(video, onCode);
+    const stopReading = detector ? await startNative(video, stream, detector, onCode) : await startZxing(video, stream, onCode);
+    const opened = stream;
+    return {
+      camera: cameraControls(opened),
+      stop: () => {
+        stopReading();
+        opened.getTracks().forEach((track) => track.stop());
+        video.srcObject = null;
+      },
+    };
   } catch (error) {
+    stream?.getTracks().forEach((track) => track.stop());
     throw cameraErrorKind(error);
   }
 }
